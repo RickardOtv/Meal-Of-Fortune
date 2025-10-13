@@ -2,7 +2,7 @@
 .main-layout {
   display: flex;
   flex-direction: row;
-  gap: 40px;
+  gap: 15px; /* UX-friendly space between columns */
   align-items: flex-start;
   justify-content: center;
   width: 100%;
@@ -25,10 +25,12 @@
   background: linear-gradient(135deg, #f8fafc 60%, #e3f0ff 100%);
   border-radius: 18px;
   box-shadow: 0 2px 16px rgba(66,133,244,0.08);
-  padding: 40px 32px 32px 32px;
+  padding: 15px; /* 15px on all sides */
   display: flex;
   flex-direction: column;
   align-items: center;
+  height: 540px;
+  box-sizing: border-box;
 }
 
 #wheel {
@@ -96,41 +98,48 @@
   background: linear-gradient(135deg, #f8fafc 60%, #e3f0ff 100%);
   border-radius: 18px;
   box-shadow: 0 2px 16px rgba(66,133,244,0.08);
-  padding: 32px;
+  padding: 15px; /* 15px on all sides */
   width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
+  height: 540px;
+  box-sizing: border-box;
+  min-width: calc(100% + 30px);
 }
 
 #map {
   width: 100%;
   min-width: 500px;
   max-width: 900px;
-  height: 540px;
+  height: 100%;
   border-radius: 16px;
   box-shadow: 0 2px 12px rgba(0,0,0,0.08);
   background: #fff;
 }
 
 /* ===== Sidebar Section ===== */
+/* Sidebar background: same height as map, with padding for visible bg */
 .sidebar-bg {
   flex: 1.2;
-  min-width: 320px;
-  max-width: 420px;
+  min-width: 350px;
+  max-width: 450px;
   background: linear-gradient(135deg, #f8fafc 60%, #e3f0ff 100%);
   border-radius: 18px;
   box-shadow: 0 2px 16px rgba(66,133,244,0.08);
-  padding: 40px 0 0 0;
+  padding: 15px; /* 15px on all sides */
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  height: 540px; /* Match #map height */
+  height: 540px;
+  box-sizing: border-box;
 }
 
+/* Sidebar content: fill available space, but not all the bg */
 .sidebar {
   flex: 1;
   max-width: 420px;
+  margin: 0 auto;
   height: 100%;
   overflow-y: auto;
   background: #fafafa;
@@ -138,8 +147,10 @@
   padding: 0;
   display: flex;
   flex-direction: column;
+  border-radius: 0 0 18px 18px;
 }
 
+/* Sticky header for sidebar */
 .sidebar-header {
   position: sticky;
   top: 0;
@@ -223,35 +234,27 @@ button.spin-btn:hover {
 /* ===== Responsive Layout ===== */
 @media (max-width: 1200px) {
   .main-layout {
-    gap: 24px;
+    gap: 10px;
     max-width: 100vw;
     padding: 0 8px;
   }
-  .map-section {
-    min-width: 320px;
+  .wheel-section,
+  .map-section,
+  .sidebar-bg {
+    min-width: 220px;
     max-width: 100vw;
+  }
+  .wheel-bg,
+  .map-bg,
+  .sidebar-bg {
+    height: 340px;
+    padding: 24px 8px 24px 8px;
+    min-width: calc(100% + 16px);
   }
   #map {
-    min-width: 320px;
-    max-width: 100vw;
-    height: 340px;
-  }
-  .sidebar-bg,
-  .sidebar {
     min-width: 220px;
     max-width: 100vw;
-    height: 340px;
-  }
-  .wheel-section,
-  .wheel-bg {
-    min-width: 220px;
-    max-width: 100vw;
-  }
-  #wheel {
-    width: 160px;
-    height: 160px;
-    font-size: 18px;
-    padding: 10px;
+    height: 100%;
   }
 }
 
@@ -274,7 +277,9 @@ button.spin-btn:hover {
   .wheel-bg,
   .sidebar-bg,
   .map-bg {
-    padding: 16px 8px 16px 8px;
+    height: 220px;
+    padding: 12px 4px 12px 4px;
+    min-width: calc(100% + 8px);
   }
   #wheel {
     width: 120px;
@@ -292,6 +297,13 @@ button.spin-btn:hover {
 }
 
 @media (max-width: 600px) {
+  .wheel-bg,
+  .map-bg,
+  .sidebar-bg {
+    height: 160px;
+    padding: 8px 2px 8px 2px;
+    min-width: calc(100% + 4px);
+  }
   #wheel {
     width: 100px;
     height: 100px;
