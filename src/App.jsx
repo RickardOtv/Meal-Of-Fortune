@@ -11,16 +11,19 @@ export default function App() {
   const [restaurants, setRestaurants] = useState([]);
   const [wheelText, setWheelText] = useState("🎡 Spin Me");
   const [radius, setRadius] = useState(500);
+  const [selectedIndexes, setSelectedIndexes] = useState([]);
 
   useEffect(() => {
     const loader = new Loader({
       apiKey: GOOGLE_MAPS_API_KEY,
       version: "weekly",
     });
-    loader.load().then(initMap);
+    loader.load().then((google) => {
+      initMap(google);
+    });
   }, []);
 
-  async function initMap() {
+  async function initMap(google) {
     const { Map, InfoWindow } = await google.maps.importLibrary("maps");
 
     const setup = (loc, zoom = 15) => {
@@ -112,7 +115,7 @@ export default function App() {
     }));
   }
 
-  async function searchRestaurants() {
+  async function searchRestaurants(google) {
     if (!mapRef.current) return;
     const centerObj = mapRef.current.getCenter();
     if (!centerObj) return;
@@ -127,6 +130,7 @@ export default function App() {
     const items = await fetchRestaurants(centerLiteral, radius);
     setRestaurants(items);
     setWheelText("🎡 Spin Me");
+    setSelectedIndexes(items.map((_, i) => i)); // Select all by default
 
     markersRef.current.forEach((m) => m.setMap(null));
     markersRef.current = [];
@@ -174,13 +178,13 @@ export default function App() {
   }
 
   function spinWheel() {
-    if (restaurants.length === 0) {
-      setWheelText("⚠️ Search first!");
+    if (selectedIndexes.length === 0) {
+      setWheelText("⚠️ Select at least one!");
       return;
     }
 
     const wheelEl = document.getElementById("wheel");
-    const chosenIndex = Math.floor(Math.random() * restaurants.length);
+    const chosenIndex = selectedIndexes[Math.floor(Math.random() * selectedIndexes.length)];
     const chosen = restaurants[chosenIndex];
 
     if (wheelEl) {
@@ -204,68 +208,120 @@ export default function App() {
     if (circleRef.current) circleRef.current.setRadius(r);
   }
 
+  function focusRestaurant(index, google) {
+    const restaurant = restaurants[index];
+    if (!restaurant || !mapRef.current) return;
+    mapRef.current.setCenter(restaurant.location);
+    mapRef.current.setZoom(17);
+    if (markersRef.current[index] && infoWindowRef.current && google) {
+      google.maps.event.trigger(markersRef.current[index], "click");
+    }
+  }
+
+  function handleCheckboxChange(idx) {
+    setSelectedIndexes((prev) =>
+      prev.includes(idx)
+        ? prev.filter((i) => i !== idx)
+        : [...prev, idx]
+    );
+  }
+
+  function selectAllRestaurants() {
+    setSelectedIndexes(restaurants.map((_, i) => i));
+  }
+
+  function deselectAllRestaurants() {
+    setSelectedIndexes([]);
+  }
+
   return (
     <div className="app">
       <h1>🍽️ Meal of Fortune 🎡</h1>
+      <div className="main-layout">
+        {/* Wheel Section - Left */}
+        <section className="wheel-section">
+          <div className="wheel-bg">
+            <div id="wheel" onClick={spinWheel}>
+              {wheelText}
+            </div>
+            <div className="dragbar-controls">
+              <label>
+                Radius: <strong>{radius} m</strong>
+              </label>
+              <input
+                type="range"
+                min="100"
+                max="1500"
+                step="100"
+                value={radius}
+                onChange={handleRadiusChange}
+                className="radius-slider"
+              />
+              <button onClick={() => searchRestaurants(window.google)}>Search</button>
+            </div>
+          </div>
+        </section>
 
-      <div className="map-layout">
-        <div id="map"></div>
+        {/* Map Section - Center */}
+        <section className="map-section">
+          <div className="map-bg">
+            <div id="map"></div>
+          </div>
+        </section>
 
-        <aside className="sidebar">
-          <h2>Found Restaurants</h2>
-          {restaurants.length === 0 && (
-            <p>No results yet. Drag map and press Search.</p>
-          )}
-          <ul>
-            {restaurants.map((r, i) => (
-              <li key={r.id ?? i} onClick={() => focusRestaurant(i)}>
-                {r.photoUrl ? (
-                  <img
-                    src={r.photoUrl}
-                    alt={r.name}
-                    style={{
-                      width: "60px",
-                      height: "60px",
-                      objectFit: "cover",
-                      marginRight: "8px",
-                      float: "left",
-                      borderRadius: "6px",
+        {/* Sidebar Section - Right */}
+        <aside className="sidebar-bg">
+          <div className="sidebar">
+            <div className="sidebar-header">
+              <h2>Found Restaurants</h2>
+            </div>
+            {restaurants.length === 0 && (
+              <p className="no-results">No results yet. Drag map and press Search.</p>
+            )}
+            <ul>
+              {restaurants.map((r, i) => (
+                <li
+                  key={r.id ?? i}
+                  className="restaurant-item"
+                  onClick={() => focusRestaurant(i, window.google)}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedIndexes.includes(i)}
+                    onClick={(e) => e.stopPropagation()}
+                    onChange={() => {
+                      handleCheckboxChange(i);
                     }}
+                    className="restaurant-checkbox"
+                    aria-label={`Select ${r.name}`}
                   />
-                ) : null}
-                <div style={{ overflow: "hidden" }}>
-                  <strong>{r.name}</strong>
-                  <br />
-                  <small>{r.address}</small>
-                  <br />
-                  <small>{priceToSymbols(r.priceLevel)}</small>
-                </div>
-              </li>
-            ))}
-          </ul>
+                  {r.photoUrl && (
+                    <img
+                      src={r.photoUrl}
+                      alt={r.name}
+                      className="restaurant-photo"
+                    />
+                  )}
+                  <div className="restaurant-details">
+                    <strong>{r.name}</strong>
+                    <br />
+                    <small>{r.address}</small>
+                    <br />
+                    <small>{priceToSymbols(r.priceLevel)}</small>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <div className="select-controls-bottom">
+              <button type="button" onClick={selectAllRestaurants}>
+                Select All
+              </button>
+              <button type="button" onClick={deselectAllRestaurants}>
+                Deselect All
+              </button>
+            </div>
+          </div>
         </aside>
-      </div>
-
-      <div className="controls">
-        <label>
-          Radius: <strong>{radius} m</strong>
-        </label>
-        <input
-          type="range"
-          min="100"
-          max="1500"
-          step="100"
-          value={radius}
-          onChange={handleRadiusChange}
-          className="radius-slider"
-        />
-
-        <button onClick={searchRestaurants}>Search</button>
-
-        {/* Wheel is now clickable */}
-        <div id="wheel" onClick={spinWheel}>
-          {wheelText}
-        </div>
       </div>
     </div>
   );
