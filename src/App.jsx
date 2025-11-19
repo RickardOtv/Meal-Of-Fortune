@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { Loader } from "@googlemaps/js-api-loader";
+import confetti from "canvas-confetti";
 import "./index.css";
 import GOOGLE_MAPS_API_KEY from "./key";
 import Wheel from "./components/Wheel";
@@ -219,6 +220,32 @@ export default function App() {
               : "http://maps.google.com/mapfiles/ms/icons/red-dot.png"
           });
         });
+
+        // Trigger confetti effect
+        const duration = 1000;
+        const end = Date.now() + duration;
+
+        const frame = () => {
+          confetti({
+            particleCount: 2,
+            angle: 60,
+            spread: 55,
+            origin: { x: 0 },
+            colors: ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff']
+          });
+          confetti({
+            particleCount: 2,
+            angle: 120,
+            spread: 55,
+            origin: { x: 1 },
+            colors: ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff']
+          });
+
+          if (Date.now() < end) {
+            requestAnimationFrame(frame);
+          }
+        };
+        frame();
       }, 2000);
     }
   }
