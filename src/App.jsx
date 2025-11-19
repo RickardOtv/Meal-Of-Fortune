@@ -54,12 +54,19 @@ export default function App() {
         zoom,
       });
 
-      // "You are here" marker
+      // "You are here" marker with custom gothic styling
       new google.maps.Marker({
         map: mapRef.current,
         position: loc,
         title: "You are here",
-        icon: { url: "http://maps.google.com/mapfiles/ms/icons/red-dot.png" },
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          fillColor: "#d4af37",
+          fillOpacity: 1,
+          strokeWeight: 3,
+          strokeColor: "#2d1b2e",
+          scale: 8,
+        },
       });
 
       // Search radius circle
@@ -164,7 +171,7 @@ export default function App() {
     markersRef.current.forEach((m) => m.setMap(null));
     markersRef.current = [];
 
-    // Add new markers (all red)
+    // Add new markers (all burgundy pointers)
     const iw = infoWindowRef.current;
     items.forEach((r) => {
       if (!r.location) return;
@@ -173,17 +180,30 @@ export default function App() {
         position: r.location,
         title: r.name,
         icon: {
-          url: "http://maps.google.com/mapfiles/ms/icons/red-dot.png"
+          path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
+          fillColor: "#6b2d5c",
+          fillOpacity: 1,
+          strokeWeight: 2,
+          strokeColor: "#2d1b2e",
+          scale: 4,
         }
       });
 
       marker.addListener("click", () => {
         const div = document.createElement("div");
-        div.style.maxWidth = "240px";
+        div.style.maxWidth = "280px";
+        div.style.padding = "16px";
+        div.style.background = "#f4e4c1";
+        div.style.borderRadius = "12px";
+        div.style.border = "3px solid #d4af37";
+        div.style.position = "relative";
+        div.style.margin = "-12px";
+        div.style.boxShadow = "0 4px 20px rgba(0,0,0,0.3), 0 0 20px rgba(212,175,55,0.3)";
         div.innerHTML = `
-          <div style="font-weight:bold;">${r.name}</div>
-          <div>${r.address}</div>
-          ${r.mapsUrl ? `<a href="${r.mapsUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin-top:6px;">Open in Google Maps</a>` : ""}
+          <span onclick="this.closest('.gm-style-iw-c')?.parentElement?.querySelector('button')?.click()" style="position:absolute; top:10px; right:10px; color:#2d1b2e; font-size:24px; cursor:pointer; line-height:1; opacity:0.5; transition:opacity 0.2s; user-select:none;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='0.5'">×</span>
+          <div style="font-weight:bold; color:#000000; font-size:17px; margin-bottom:8px; font-family:'Cinzel', serif; padding-right:30px;">${r.name}</div>
+          <div style="color:#1a1a1a; font-size:14px; margin-bottom:10px; line-height:1.5;">${r.address}</div>
+          ${r.mapsUrl ? `<a href="${r.mapsUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-block; margin-top:4px; color:#8b6914; font-weight:600; text-decoration:none; border-bottom:2px solid #d4af37; font-family:'Cinzel', serif; font-size:13px;">Open in Google Maps →</a>` : ""}
         `;
         iw.setContent(div);
         iw.open({ map: mapRef.current, anchor: marker });
@@ -212,33 +232,44 @@ export default function App() {
         setWheelText(`🎉 ${chosen.name}`);
         wheelEl.style.transition = "none";
         wheelEl.style.transform = "rotate(0deg)";
-        // Set all markers to red, winner to green
+        // Set all markers to burgundy, winner to gold
         markersRef.current.forEach((marker, idx) => {
           marker.setIcon({
-            url: idx === chosenIndex
-              ? "http://maps.google.com/mapfiles/ms/icons/green-dot.png"
-              : "http://maps.google.com/mapfiles/ms/icons/red-dot.png"
+            path: window.google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
+            fillColor: idx === chosenIndex ? "#d4af37" : "#6b2d5c",
+            fillOpacity: 1,
+            strokeWeight: 2,
+            strokeColor: "#2d1b2e",
+            scale: 4,
           });
         });
 
-        // Trigger confetti effect
-        const duration = 1000;
+        // Trigger confetti effect with gothic colors
+        const duration = 2000;
         const end = Date.now() + duration;
 
         const frame = () => {
           confetti({
-            particleCount: 2,
+            particleCount: 3,
             angle: 60,
-            spread: 55,
+            spread: 60,
             origin: { x: 0 },
-            colors: ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff']
+            colors: ['#d4af37', '#b8860b', '#f4d03f', '#6b2d5c', '#4a1c40'],
+            ticks: 200,
+            gravity: 0.8,
+            decay: 0.94,
+            startVelocity: 30
           });
           confetti({
-            particleCount: 2,
+            particleCount: 3,
             angle: 120,
-            spread: 55,
+            spread: 60,
             origin: { x: 1 },
-            colors: ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff']
+            colors: ['#d4af37', '#b8860b', '#f4d03f', '#6b2d5c', '#4a1c40'],
+            ticks: 200,
+            gravity: 0.8,
+            decay: 0.94,
+            startVelocity: 30
           });
 
           if (Date.now() < end) {
