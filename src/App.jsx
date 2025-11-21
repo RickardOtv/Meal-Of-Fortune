@@ -31,6 +31,11 @@ export default function App() {
   const [wheelText, setWheelText] = useState("🎡 Spin Me"); // Wheel display text
   const [radius, setRadius] = useState(500);           // Search radius in meters
   const [selectedIndexes, setSelectedIndexes] = useState([]); // Selected restaurants
+  const [filters, setFilters] = useState({
+    isOpen: false,
+    isRestaurant: true,
+    isCafe: false,
+  });
 
   // ===== Initialize Google Map on mount =====
   useEffect(() => {
@@ -102,7 +107,15 @@ export default function App() {
   }
 
   // ===== Fetch restaurants from Google Places API =====
-  async function fetchRestaurants(centerLiteral, radius) {
+  async function fetchRestaurants(centerLiteral, radius, appliedFilters) {
+    // Build includedPrimaryTypes based on filters
+    const types = [];
+    if (appliedFilters.isRestaurant) types.push("restaurant");
+    if (appliedFilters.isCafe) types.push("cafe");
+
+    // If no types selected, default to restaurant
+    if (types.length === 0) types.push("restaurant");
+
     const resp = await fetch(
       "https://places.googleapis.com/v1/places:searchNearby",
       {
@@ -111,10 +124,10 @@ export default function App() {
           "Content-Type": "application/json",
           "X-Goog-Api-Key": GOOGLE_MAPS_API_KEY,
           "X-Goog-FieldMask":
-            "places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.priceLevel,places.photos,places.googleMapsUri",
+            "places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.priceLevel,places.photos,places.googleMapsUri,places.currentOpeningHours",
         },
         body: JSON.stringify({
-          includedPrimaryTypes: ["restaurant"],
+          includedPrimaryTypes: types,
           maxResultCount: 20,
           locationRestriction: {
             circle: {
@@ -130,7 +143,7 @@ export default function App() {
     );
 
     const data = await resp.json();
-    return (data.places || []).map((place) => ({
+    let places = (data.places || []).map((place) => ({
       id: place.id,
       name: place.displayName?.text || "Unnamed Restaurant",
       address: place.formattedAddress || "",
@@ -144,7 +157,15 @@ export default function App() {
         ? `https://places.googleapis.com/v1/${place.photos[0].name}/media?key=${GOOGLE_MAPS_API_KEY}&maxHeightPx=80&maxWidthPx=80`
         : null,
       mapsUrl: place.googleMapsUri,
+      isOpen: place.currentOpeningHours?.openNow === true,
     }));
+
+    // Apply "Open Now" filter if enabled
+    if (appliedFilters.isOpen) {
+      places = places.filter(place => place.isOpen);
+    }
+
+    return places;
   }
 
   // ===== Search for restaurants and update map =====
@@ -161,8 +182,8 @@ export default function App() {
       circleRef.current.setRadius(radius);
     }
 
-    // Fetch restaurants
-    const items = await fetchRestaurants(centerLiteral, radius);
+    // Fetch restaurants with current filters
+    const items = await fetchRestaurants(centerLiteral, radius, filters);
     setRestaurants(items);
     setWheelText("🎡 Spin Me");
     setSelectedIndexes(items.map((_, i) => i)); // Select all by default
@@ -325,6 +346,8 @@ export default function App() {
           radius={radius}
           handleRadiusChange={handleRadiusChange}
           searchRestaurants={() => searchRestaurants(window.google)}
+          filters={filters}
+          setFilters={setFilters}
         />
         <Map />
         <Sidebar
