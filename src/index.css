@@ -881,31 +881,44 @@ button.spin-btn:hover {
     font-size: 0.6em;
   }
 
-  .wheel-bg,
+  .wheel-bg {
+    height: 360px;
+    padding: 12px;
+    min-width: 100%;
+  }
+
   .map-bg,
   .sidebar-bg {
-    height: 240px;
+    height: 400px;
     padding: 12px;
     min-width: 100%;
   }
 
   #wheel {
-    width: 140px;
-    height: 140px;
-    font-size: 16px;
-    padding: 12px;
+    width: 200px;
+    height: 200px;
+    font-size: 18px;
+    padding: 16px;
     border-width: 6px;
   }
 
   #wheel::before {
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
   }
 
-  #map,
+  #map {
+    height: 100%;
+  }
+
   .sidebar-bg,
   .sidebar {
-    height: 200px;
+    height: 100%;
+  }
+
+  .sidebar-header h2 {
+    font-size: 1.3rem;
+    padding: 16px 12px 12px 12px;
   }
 
   button {
