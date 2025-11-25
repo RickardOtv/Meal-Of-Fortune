@@ -98,13 +98,47 @@ export default function App() {
     };
 
     // Try geolocation, fallback to NYC
-    navigator.geolocation.getCurrentPosition(
-      (pos) => setup({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-      () => {
-        alert("Geolocation failed, using NYC fallback.");
-        setup({ lat: 40.7128, lng: -74.006 }, 14);
-      }
-    );
+    const geoOptions = {
+      enableHighAccuracy: true,
+      timeout: 7000,
+      maximumAge: 0
+    };
+
+    // Check permission first (helps with Safari)
+    if (navigator.permissions && navigator.permissions.query) {
+      navigator.permissions.query({ name: 'geolocation' }).then((result) => {
+        if (result.state === 'granted' || result.state === 'prompt') {
+          requestLocation();
+        } else {
+          // Permission denied
+          console.warn("Geolocation permission denied");
+          alert("Location access is blocked. Please enable location for this site in Safari Settings > Privacy > Location Services > Safari Websites. Using NYC as default.");
+          setup({ lat: 40.7128, lng: -74.006 }, 14);
+        }
+      }).catch(() => {
+        // Permissions API not supported, try anyway
+        requestLocation();
+      });
+    } else {
+      // Permissions API not supported, try anyway
+      requestLocation();
+    }
+
+    function requestLocation() {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => setup({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+        (error) => {
+          console.error("Geolocation error:", error);
+          let message = "Location access unavailable. Using NYC as default. You can drag the map to your location.";
+          if (error.code === 1) { // PERMISSION_DENIED
+            message = "Location blocked. On iPhone: Settings > Privacy > Location Services > Safari Websites > While Using. Using NYC as default.";
+          }
+          alert(message);
+          setup({ lat: 40.7128, lng: -74.006 }, 14);
+        },
+        geoOptions
+      );
+    }
   }
 
   // ===== Fetch restaurants from Google Places API =====
