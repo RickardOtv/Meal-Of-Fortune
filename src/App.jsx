@@ -98,39 +98,10 @@ export default function App() {
     };
 
     // Try geolocation, fallback to NYC
-    const geoOptions = {
-      enableHighAccuracy: true,
-      timeout: 10000,
-      maximumAge: 0
-    };
-
-    function requestLocation() {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          console.log("Geolocation success:", pos.coords);
-          setup({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-        },
-        (error) => {
-          console.error("Geolocation error code:", error.code, "message:", error.message);
-          let message = "Location access unavailable. Using NYC as default. You can drag the map to your location.";
-
-          if (error.code === 1) { // PERMISSION_DENIED
-            message = "Location blocked. On iPhone: Settings > Privacy & Security > Location Services > Safari Websites > While Using. Using NYC as default.";
-          } else if (error.code === 2) { // POSITION_UNAVAILABLE
-            message = "Location unavailable. Make sure WiFi is enabled on your device. Using NYC as default.";
-          } else if (error.code === 3) { // TIMEOUT
-            message = "Location request timed out. Using NYC as default.";
-          }
-
-          alert(message);
-          setup({ lat: 40.7128, lng: -74.006 }, 14);
-        },
-        geoOptions
-      );
-    }
-
-    // Safari iOS needs simple direct call
-    requestLocation();
+    navigator.geolocation.getCurrentPosition(
+      (pos) => setup({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      () => setup({ lat: 40.7128, lng: -74.006 }, 14)
+    );
   }
 
   // ===== Fetch restaurants from Google Places API =====
