@@ -2,10 +2,11 @@ import { useEffect, useState, useRef } from "react";
 import { Loader } from "@googlemaps/js-api-loader";
 import confetti from "canvas-confetti";
 import "./index.css";
-import GOOGLE_MAPS_API_KEY from "./key";
 import Wheel from "./components/Wheel";
 import Map from "./components/Map";
 import Sidebar from "./components/Sidebar";
+
+const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
 // Converts Google price level to readable symbols
 function priceToSymbols(priceLevel) {
