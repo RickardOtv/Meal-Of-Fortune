@@ -7,9 +7,9 @@ Turn indecision into adventure! Meal of Fortune gamifies the "where should we ea
 ## Features
 
 - **Fortune Wheel**: Spin to randomly select a restaurant from your search results
-- **Interactive Map**: View nearby restaurants on an integrated Google Maps interface with custom gothic-themed markers
-- **Adjustable Search Radius**: Control the search area from 100m to 1500m
-- **Advanced Filters**: Filter by open restaurants, restaurants, and cafes
+- **Interactive Map**: View restaurants on an integrated Google Maps interface with custom gothic-themed markers
+- **Map Viewport Search**: Search for restaurants within the visible map area (up to 60 results)
+- **Advanced Filters**: Filter by open restaurants, restaurants, and cafes (Open Now enabled by default)
 - **Restaurant Selection**: Choose which restaurants to include in the wheel spin
 - **Celebration Effects**: Gothic-themed confetti animation when a winner is chosen
 - **Dark Gothic Aesthetic**: Immersive UI with burgundy, gold, and vintage styling
@@ -48,9 +48,9 @@ npm run dev
 ## Usage
 
 1. Allow location access when prompted (or the app will default to NYC)
-2. Adjust the search radius using the slider (100m - 1500m)
+2. Pan and zoom the map to your desired search area
 3. Click "Filters" to choose restaurant types and whether to show only open restaurants
-4. Click "Search" to find nearby restaurants
+4. Click "Search" to find restaurants within the visible map area
 5. Select/deselect restaurants from the sidebar using checkboxes
 6. Click the fortune wheel to spin and discover your meal destiny
 7. Click on map markers to view restaurant details
