@@ -24,16 +24,15 @@ function priceToSymbols(priceLevel) {
 export default function App() {
   // ===== State and Refs =====
   const mapRef = useRef(null);         // Google Map instance
-  const circleRef = useRef(null);      // Search radius circle
   const infoWindowRef = useRef(null);  // Info window for markers
   const markersRef = useRef([]);       // Restaurant markers
 
   const [restaurants, setRestaurants] = useState([]); // List of found restaurants
   const [wheelText, setWheelText] = useState("🎡 Spin Me"); // Wheel display text
-  const [radius, setRadius] = useState(500);           // Search radius in meters
   const [selectedIndexes, setSelectedIndexes] = useState([]); // Selected restaurants
+  const [isSearching, setIsSearching] = useState(false); // Loading state for search
   const [filters, setFilters] = useState({
-    isOpen: false,
+    isOpen: true,
     isRestaurant: true,
     isCafe: false,
   });
@@ -75,26 +74,7 @@ export default function App() {
         },
       });
 
-      // Search radius circle
-      circleRef.current = new google.maps.Circle({
-        map: mapRef.current,
-        center: loc,
-        radius,
-        strokeColor: "#4285F4",
-        strokeOpacity: 0.8,
-        strokeWeight: 2,
-        fillColor: "#4285F4",
-        fillOpacity: 0.15,
-        clickable: false,
-      });
-
       infoWindowRef.current = new InfoWindow();
-
-      // Keep circle centered when map moves
-      mapRef.current.addListener("center_changed", () => {
-        const c = mapRef.current.getCenter();
-        if (c && circleRef.current) circleRef.current.setCenter(c);
-      });
     };
 
     // Try geolocation, fallback to NYC
@@ -117,44 +97,65 @@ export default function App() {
     }
   }
 
-  // ===== Fetch restaurants from Google Places API =====
-  async function fetchRestaurants(centerLiteral, radius, appliedFilters) {
-    // Build includedPrimaryTypes based on filters
-    const types = [];
-    if (appliedFilters.isRestaurant) types.push("restaurant");
-    if (appliedFilters.isCafe) types.push("cafe");
+  // ===== Fetch restaurants from Google Places API (Text Search with pagination) =====
+  async function fetchRestaurants(bounds, appliedFilters) {
+    const sw = bounds.getSouthWest();
+    const ne = bounds.getNorthEast();
 
-    // If no types selected, default to restaurant
-    if (types.length === 0) types.push("restaurant");
+    // Build text query from filters
+    const queryParts = [];
+    if (appliedFilters.isRestaurant) queryParts.push("restaurant");
+    if (appliedFilters.isCafe) queryParts.push("cafe");
+    const textQuery = queryParts.length > 0 ? queryParts.join(" ") : "restaurant";
 
-    const resp = await fetch(
-      "https://places.googleapis.com/v1/places:searchNearby",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Goog-Api-Key": GOOGLE_MAPS_API_KEY,
-          "X-Goog-FieldMask":
-            "places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.priceLevel,places.photos,places.googleMapsUri,places.currentOpeningHours",
+    let allPlaces = [];
+    let pageToken = null;
+
+    // Fetch up to 3 pages (60 results max)
+    do {
+      const body = {
+        textQuery,
+        // Use locationRestriction (rectangle) for strict bounds - only returns places within visible area
+        locationRestriction: {
+          rectangle: {
+            low: { latitude: sw.lat(), longitude: sw.lng() },
+            high: { latitude: ne.lat(), longitude: ne.lng() }
+          }
         },
-        body: JSON.stringify({
-          includedPrimaryTypes: types,
-          maxResultCount: 20,
-          locationRestriction: {
-            circle: {
-              center: {
-                latitude: centerLiteral.lat,
-                longitude: centerLiteral.lng,
-              },
-              radius,
-            },
-          },
-        }),
-      }
-    );
+        ...(pageToken && { pageToken })
+      };
 
-    const data = await resp.json();
-    let places = (data.places || []).map((place) => ({
+      const resp = await fetch(
+        "https://places.googleapis.com/v1/places:searchText",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Goog-Api-Key": GOOGLE_MAPS_API_KEY,
+            "X-Goog-FieldMask":
+              "places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.priceLevel,places.photos,places.googleMapsUri,places.currentOpeningHours,nextPageToken",
+          },
+          body: JSON.stringify(body),
+        }
+      );
+
+      const data = await resp.json();
+      console.log("API Response:", data);
+      if (data.error) {
+        console.error("API Error:", data.error);
+        break;
+      }
+      allPlaces.push(...(data.places || []));
+      pageToken = data.nextPageToken;
+
+      // Small delay required between pagination requests
+      if (pageToken) await new Promise(r => setTimeout(r, 200));
+    } while (pageToken);
+
+    console.log(`Total places found: ${allPlaces.length}`);
+
+    // Transform places to app format
+    let places = allPlaces.map((place) => ({
       id: place.id,
       name: place.displayName?.text || "Unnamed Restaurant",
       address: place.formattedAddress || "",
@@ -182,19 +183,14 @@ export default function App() {
   // ===== Search for restaurants and update map =====
   async function searchRestaurants(google) {
     if (!mapRef.current) return;
-    const centerObj = mapRef.current.getCenter();
-    if (!centerObj) return;
+    const bounds = mapRef.current.getBounds();
+    if (!bounds) return;
 
-    const centerLiteral = { lat: centerObj.lat(), lng: centerObj.lng() };
+    setIsSearching(true);
 
-    // Update circle position and radius
-    if (circleRef.current) {
-      circleRef.current.setCenter(centerObj);
-      circleRef.current.setRadius(radius);
-    }
-
-    // Fetch restaurants with current filters
-    const items = await fetchRestaurants(centerLiteral, radius, filters);
+    // Fetch restaurants within visible map bounds
+    const items = await fetchRestaurants(bounds, filters);
+    setIsSearching(false);
     setRestaurants(items);
     setWheelText("🎡 Spin Me");
     setSelectedIndexes(items.map((_, i) => i)); // Select all by default
@@ -314,12 +310,6 @@ export default function App() {
   }
 
   // ===== UI Handlers =====
-  function handleRadiusChange(e) {
-    const r = Number(e.target.value);
-    setRadius(r);
-    if (circleRef.current) circleRef.current.setRadius(r);
-  }
-
   function focusRestaurant(index, google) {
     const restaurant = restaurants[index];
     if (!restaurant || !mapRef.current) return;
@@ -354,11 +344,10 @@ export default function App() {
         <Wheel
           wheelText={wheelText}
           spinWheel={spinWheel}
-          radius={radius}
-          handleRadiusChange={handleRadiusChange}
           searchRestaurants={() => searchRestaurants(window.google)}
           filters={filters}
           setFilters={setFilters}
+          isSearching={isSearching}
         />
         <Map />
         <Sidebar

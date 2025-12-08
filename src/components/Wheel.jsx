@@ -3,11 +3,10 @@ import { useState, useRef, useEffect } from "react";
 export default function Wheel({
   wheelText,
   spinWheel,
-  radius,
-  handleRadiusChange,
   searchRestaurants,
   filters,
-  setFilters
+  setFilters,
+  isSearching
 }) {
   const [showFilters, setShowFilters] = useState(false);
   const filterContainerRef = useRef(null);
@@ -35,19 +34,9 @@ export default function Wheel({
           {wheelText}
         </div>
         <div className="dragbar-controls">
-          <label>
-            Radius: <strong>{radius} m</strong>
-          </label>
-          <input
-            type="range"
-            min="100"
-            max="1500"
-            step="100"
-            value={radius}
-            onChange={handleRadiusChange}
-            className="radius-slider"
-          />
-          <button onClick={searchRestaurants}>Search</button>
+          <button onClick={searchRestaurants} disabled={isSearching}>
+            {isSearching ? "Searching..." : "Search"}
+          </button>
           <div className="filter-container" ref={filterContainerRef}>
             <button
               className="filter-toggle-button"
