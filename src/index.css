@@ -867,6 +867,12 @@ button.spin-btn:hover {
   .sidebar-bg {
     height: 500px;
     padding: 16px;
+    min-width: 0;
+    min-width: unset;
+  }
+
+  .map-bg {
+    min-width: 100%;
   }
 
   #wheel {
@@ -880,8 +886,9 @@ button.spin-btn:hover {
 
   #map {
     width: 100%;
-    min-width: 0;
+    min-width: 0 !important;
     height: 100%;
+    height: 460px;
   }
 
   .sidebar {
@@ -1026,34 +1033,45 @@ button.spin-btn:hover {
   }
 
   /* Fix for iOS map display */
-  #map {
-    min-height: 400px;
-    height: 100%;
+  .map-section {
+    min-width: 0 !important;
     width: 100%;
   }
 
-  .map-bg {
-    min-height: 400px;
+  #map {
+    min-height: 400px !important;
+    height: 420px !important;
+    width: 100% !important;
+    min-width: 0 !important;
   }
 
-  /* Fix for iOS viewport height issues */
+  .map-bg {
+    min-height: 450px !important;
+    height: 450px !important;
+    min-width: 0 !important;
+    width: 100%;
+  }
+
+  /* Fix for iOS viewport height issues on mobile */
   @media (max-width: 900px) {
     .map-section {
-      width: 100%;
-      min-width: 0;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100%;
     }
 
     .map-bg {
-      min-height: 400px;
-      height: 450px;
-      min-width: 100%;
+      min-height: 420px !important;
+      height: 450px !important;
+      min-width: 0 !important;
+      width: 100%;
     }
 
     #map {
-      min-width: 100%;
-      width: 100%;
-      height: 100%;
-      min-height: 380px;
+      min-width: 0 !important;
+      width: 100% !important;
+      height: 400px !important;
+      min-height: 400px !important;
     }
 
     .sidebar-bg {
