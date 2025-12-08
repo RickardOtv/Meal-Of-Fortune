@@ -1,0 +1,19 @@
+{
+  "name": "Meal of Fortune",
+  "short_name": "Meal of Fortune",
+  "icons": [
+    {
+      "src": "/src/assets/favicon_io/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/src/assets/favicon_io/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#1a0f1e",
+  "background_color": "#1a0f1e",
+  "display": "standalone"
+}
