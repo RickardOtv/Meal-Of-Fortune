@@ -1025,13 +1025,40 @@ button.spin-btn:hover {
     -webkit-overflow-scrolling: touch;
   }
 
+  /* Fix for iOS map display */
+  #map {
+    min-height: 400px;
+    height: 100%;
+    width: 100%;
+  }
+
+  .map-bg {
+    min-height: 400px;
+  }
+
   /* Fix for iOS viewport height issues */
   @media (max-width: 900px) {
-    .map-bg,
+    .map-section {
+      width: 100%;
+      min-width: 0;
+    }
+
+    .map-bg {
+      min-height: 400px;
+      height: 450px;
+      min-width: 100%;
+    }
+
+    #map {
+      min-width: 100%;
+      width: 100%;
+      height: 100%;
+      min-height: 380px;
+    }
+
     .sidebar-bg {
       min-height: 400px;
-      height: auto;
-      max-height: 500px;
+      height: 450px;
     }
   }
 }
