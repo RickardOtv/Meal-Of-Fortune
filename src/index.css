@@ -1001,3 +1001,37 @@ button.spin-btn:hover {
     font-size: 13px;
   }
 }
+
+/* ===== Safari iOS Fixes ===== */
+@supports (-webkit-touch-callout: none) {
+  /* iOS Safari specific fixes */
+  .main-layout {
+    display: -webkit-flex;
+    display: flex;
+  }
+
+  .sidebar-bg {
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-shrink: 0;
+    flex-shrink: 0;
+  }
+
+  .sidebar {
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-direction: column;
+    flex-direction: column;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Fix for iOS viewport height issues */
+  @media (max-width: 900px) {
+    .map-bg,
+    .sidebar-bg {
+      min-height: 400px;
+      height: auto;
+      max-height: 500px;
+    }
+  }
+}

@@ -24,3 +24,6 @@ key.jsx
 *.njsproj
 *.sln
 *.sw?
+
+# Claude
+.claude

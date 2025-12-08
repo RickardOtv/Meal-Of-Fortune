@@ -98,10 +98,23 @@ export default function App() {
     };
 
     // Try geolocation, fallback to NYC
-    navigator.geolocation.getCurrentPosition(
-      (pos) => setup({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-      () => setup({ lat: 40.7128, lng: -74.006 }, 14)
-    );
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => setup({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+        (error) => {
+          console.log("Geolocation error:", error.message);
+          setup({ lat: 40.7128, lng: -74.006 }, 14);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 15000,
+          maximumAge: 0
+        }
+      );
+    } else {
+      console.log("Geolocation not supported");
+      setup({ lat: 40.7128, lng: -74.006 }, 14);
+    }
   }
 
   // ===== Fetch restaurants from Google Places API =====
