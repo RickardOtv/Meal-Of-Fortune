@@ -360,6 +360,14 @@ export default function App() {
           priceToSymbols={priceToSymbols}
         />
       </div>
+      <a
+        href="https://github.com/RickardOtv"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="github-link"
+      >
+        Made by RickardOtv
+      </a>
     </div>
   );
 }

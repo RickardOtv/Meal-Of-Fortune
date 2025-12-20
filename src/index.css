@@ -933,6 +933,24 @@ button.spin-btn:hover {
   }
 }
 
+/* ===== GitHub Link ===== */
+.github-link {
+  position: fixed;
+  bottom: 12px;
+  left: 12px;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.85rem;
+  color: var(--color-gold);
+  text-decoration: none;
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+
+.github-link:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
 /* ===== Safari iOS Fixes ===== */
 @supports (-webkit-touch-callout: none) {
   /* iOS Safari specific fixes */
