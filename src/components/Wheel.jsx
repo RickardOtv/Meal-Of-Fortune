@@ -9,11 +9,15 @@ export default function Wheel({
   isSearching
 }) {
   const [showFilters, setShowFilters] = useState(false);
-  const filterContainerRef = useRef(null);
+  const filterDropdownRef = useRef(null);
+  const filterButtonRef = useRef(null);
 
   useEffect(() => {
     function handleClickOutside(event) {
-      if (filterContainerRef.current && !filterContainerRef.current.contains(event.target)) {
+      const clickedOnButton = filterButtonRef.current?.contains(event.target);
+      const clickedOnDropdown = filterDropdownRef.current?.contains(event.target);
+
+      if (!clickedOnButton && !clickedOnDropdown) {
         setShowFilters(false);
       }
     }
@@ -37,8 +41,9 @@ export default function Wheel({
           <button onClick={searchRestaurants} disabled={isSearching}>
             {isSearching ? "Searching..." : "Search"}
           </button>
-          <div className="filter-container" ref={filterContainerRef}>
+          <div className="filter-container">
             <button
+              ref={filterButtonRef}
               className="filter-toggle-button"
               onClick={() => setShowFilters(!showFilters)}
               type="button"
@@ -46,7 +51,7 @@ export default function Wheel({
               Filters {showFilters ? "▲" : "▼"}
             </button>
             {showFilters && (
-              <div className="filter-dropdown-wheel">
+              <div className="filter-dropdown-wheel" ref={filterDropdownRef}>
                 <label className="filter-checkbox-label">
                   <input
                     type="checkbox"
