@@ -57,6 +57,7 @@ export default function App() {
       mapRef.current = new Map(document.getElementById("map"), {
         center: loc,
         zoom,
+        clickableIcons: false,
       });
 
       // "You are here" marker with custom gothic styling
