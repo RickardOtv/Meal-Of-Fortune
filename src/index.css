@@ -278,7 +278,11 @@ h1::after {
 
 /* Hide default Google Maps info window close button (the one outside content) */
 .gm-style-iw-tc::after,
-.gm-style-iw-c button[aria-label="Close"] {
+.gm-style-iw-c button[aria-label="Close"],
+.gm-style-iw-c button.gm-ui-hover-effect,
+.gm-style-iw-chr,
+.gm-style .gm-style-iw button,
+.gm-style-iw-c > button {
   display: none !important;
 }
 
@@ -1128,6 +1132,19 @@ button.spin-btn:hover {
   .map-section {
     min-width: 0 !important;
     width: 100%;
+  }
+
+  /* Hide all Google Maps info window close buttons on iOS */
+  .gm-style-iw-c button,
+  .gm-style-iw button,
+  .gm-ui-hover-effect,
+  .gm-style-iw-d + button,
+  .gm-style-iw-chr button,
+  [aria-label="Close"] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
   }
 
   #map {
