@@ -950,6 +950,21 @@ button.spin-btn:hover {
   }
 }
 
+/* ===== Footer Links ===== */
+.footer-links {
+  display: contents;
+}
+
+@media (max-width: 900px) {
+  .footer-links {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 20px 16px;
+  }
+}
+
 /* ===== GitHub Link ===== */
 .github-link {
   position: fixed;
@@ -966,14 +981,124 @@ button.spin-btn:hover {
 @media (max-width: 900px) {
   .github-link {
     position: static;
-    display: inline-block;
-    padding: 20px 16px;
+    padding: 0;
   }
 }
 
 .github-link:hover {
   opacity: 1;
   text-decoration: underline;
+}
+
+/* ===== Help Button ===== */
+.help-button {
+  position: fixed;
+  bottom: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-burgundy);
+  border: 1px solid var(--color-gold);
+  color: var(--color-gold);
+  font-family: 'Cinzel', serif;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.help-button:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+@media (max-width: 900px) {
+  .help-button {
+    position: static;
+    margin: 0;
+  }
+}
+
+/* ===== Help Modal ===== */
+.help-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.help-modal {
+  background: linear-gradient(180deg, var(--color-parchment) 0%, var(--color-parchment-dark) 100%);
+  border: 2px solid var(--color-gold);
+  border-radius: 12px;
+  padding: 24px 32px;
+  max-width: 500px;
+  width: 100%;
+  position: relative;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.help-modal h2 {
+  font-family: 'Cinzel', serif;
+  color: var(--color-burgundy);
+  margin: 0 0 16px 0;
+  font-size: 1.5rem;
+  text-align: center;
+}
+
+.help-modal ol {
+  font-family: 'Cormorant Garamond', serif;
+  color: #1a1010;
+  margin: 0;
+  padding-left: 20px;
+  line-height: 1.8;
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.help-modal li {
+  margin-bottom: 8px;
+}
+
+.help-modal strong {
+  color: var(--color-burgundy);
+}
+
+.help-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: transparent;
+  border: 1px solid var(--color-burgundy);
+  color: var(--color-burgundy);
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.help-modal-close:hover {
+  background: var(--color-burgundy);
+  color: var(--color-parchment);
 }
 
 /* ===== Safari iOS Fixes ===== */

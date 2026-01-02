@@ -36,6 +36,7 @@ export default function App() {
     isRestaurant: true,
     isCafe: false,
   });
+  const [showHelp, setShowHelp] = useState(false);
 
   // ===== Initialize Google Map on mount =====
   useEffect(() => {
@@ -361,14 +362,44 @@ export default function App() {
           priceToSymbols={priceToSymbols}
         />
       </div>
-      <a
-        href="https://github.com/RickardOtv"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="github-link"
-      >
-        Made by RickardOtv
-      </a>
+      <div className="footer-links">
+        <a
+          href="https://github.com/RickardOtv"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="github-link"
+        >
+          Made by RickardOtv
+        </a>
+        <button
+          className="help-button"
+          onClick={() => setShowHelp(true)}
+          type="button"
+        >
+          ?
+        </button>
+      </div>
+      {showHelp && (
+        <div className="help-modal-overlay" onClick={() => setShowHelp(false)}>
+          <div className="help-modal" onClick={(e) => e.stopPropagation()}>
+            <button
+              className="help-modal-close"
+              onClick={() => setShowHelp(false)}
+              type="button"
+            >
+              ×
+            </button>
+            <h2>How to Use</h2>
+            <ol>
+              <li>Navigate the map to your desired location</li>
+              <li>Use filters to select restaurant types (Restaurants, Cafes) and availability (Open Now)</li>
+              <li>Click <strong>Search</strong> to find nearby places</li>
+              <li>Check or uncheck restaurants in the list to include them in the spin</li>
+              <li>Click the wheel to <strong>Spin</strong> and let fortune decide your meal!</li>
+            </ol>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
