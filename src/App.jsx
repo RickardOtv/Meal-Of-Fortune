@@ -246,7 +246,7 @@ export default function App() {
   // ===== Spin the wheel and highlight winner =====
   function spinWheel() {
     if (selectedIndexes.length === 0) {
-      setWheelText("⚠️ Select at least one!");
+      setWheelText("⚠️ First search and select at least one!");
       return;
     }
     const wheelEl = document.getElementById("wheel");
