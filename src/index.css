@@ -393,6 +393,7 @@ h1::after {
 
 .sidebar {
   flex: 1;
+  width: 100%;
   max-width: 420px;
   margin: 0 auto;
   height: 100%;
@@ -783,20 +784,22 @@ button.spin-btn:hover {
 
   .wheel-bg {
     height: auto;
-    padding: 24px 16px;
-    min-height: 420px;
-  }
-
-  .map-bg,
-  .sidebar-bg {
-    height: 500px;
-    padding: 16px;
-    min-width: 0;
-    min-width: unset;
+    padding: 20px 16px;
+    min-height: auto;
   }
 
   .map-bg {
+    height: 500px;
+    padding: 16px;
     min-width: 100%;
+  }
+
+  .sidebar-bg {
+    height: 400px;
+    min-height: 400px;
+    max-height: 400px;
+    padding: 12px;
+    overflow: hidden;
   }
 
   #wheel {
@@ -845,14 +848,21 @@ button.spin-btn:hover {
   }
 
   .wheel-bg {
-    padding: 20px 12px;
-    min-height: 380px;
+    padding: 16px 12px;
+    min-height: auto;
   }
 
-  .map-bg,
-  .sidebar-bg {
+  .map-bg {
     height: 450px;
     padding: 12px;
+  }
+
+  .sidebar-bg {
+    height: 380px;
+    min-height: 380px;
+    max-height: 380px;
+    padding: 10px;
+    overflow: hidden;
   }
 
   #wheel {
@@ -900,14 +910,21 @@ button.spin-btn:hover {
   }
 
   .wheel-bg {
-    padding: 16px 8px;
-    min-height: 340px;
+    padding: 14px 8px;
+    min-height: auto;
   }
 
-  .map-bg,
-  .sidebar-bg {
-    height: 400px;
+  .map-bg {
+    height: 380px;
     padding: 10px;
+  }
+
+  .sidebar-bg {
+    height: 340px;
+    min-height: 340px;
+    max-height: 340px;
+    padding: 8px;
+    overflow: hidden;
   }
 
   #wheel {
@@ -944,6 +961,14 @@ button.spin-btn:hover {
   text-decoration: none;
   opacity: 0.6;
   transition: opacity 0.2s ease;
+}
+
+@media (max-width: 900px) {
+  .github-link {
+    position: static;
+    display: inline-block;
+    padding: 20px 16px;
+  }
 }
 
 .github-link:hover {
