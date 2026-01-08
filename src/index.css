@@ -786,6 +786,16 @@ button.spin-btn:hover {
     min-width: 0;
   }
 
+  .wheel-section {
+    position: relative;
+    z-index: 10;
+  }
+
+  .map-section {
+    position: relative;
+    z-index: 1;
+  }
+
   .wheel-bg {
     height: auto;
     padding: 20px 16px;
