@@ -64,18 +64,6 @@ npm run dev
 - **canvas-confetti** - Celebration effects
 - **Cloudflare Pages** - Hosting and deployment
 
-## Project Structure
-
-```
-src/
-├── components/
-│   ├── Map.jsx         # Map container component
-│   ├── Sidebar.jsx     # Restaurant list component
-│   └── Wheel.jsx       # Fortune wheel component
-├── App.jsx             # Main application component
-├── index.css           # Global styles with dark academia theme
-└── main.jsx            # Application entry point
-```
 
 ## Author
 
