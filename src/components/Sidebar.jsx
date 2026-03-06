@@ -36,14 +36,14 @@ export default function Sidebar({
         {/* Empty state: not searched yet */}
         {!isSearching && !hasSearched && restaurants.length === 0 && (
           <p className="no-results">
-            Drag the map to your area and press <strong>Search</strong> to find restaurants.
+            Move the map, then press <strong>Search</strong>.
           </p>
         )}
 
         {/* Empty state: searched but no results */}
         {!isSearching && hasSearched && restaurants.length === 0 && (
           <p className="no-results">
-            No restaurants found here. Try moving the map or adjusting your filters.
+            No results found. Try moving the map or changing filters.
           </p>
         )}
 
