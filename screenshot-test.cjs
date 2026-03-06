@@ -53,25 +53,13 @@ const { chromium } = require('playwright-core');
     // Update wheel text to show winner
     const wheel = document.getElementById('wheel');
     wheel.textContent = '🎉 Golden Dragon';
-    wheel.style.fontSize = '20px';
   });
 
   await desktop.waitForTimeout(500);
   await desktop.screenshot({ path: '/tmp/ss-winner-desktop.png' });
   console.log('1. Desktop winner state');
 
-  // Add confetti-like visual hint on wheel area (simulate post-spin)
-  await desktop.evaluate(() => {
-    // Add a toast showing the winner
-    const toast = document.createElement('div');
-    toast.className = 'toast toast-info';
-    toast.setAttribute('role', 'alert');
-    toast.innerHTML = '<span>&#127881; Golden Dragon wins! The map has centered on the restaurant.</span><button class="toast-close">&times;</button>';
-    document.querySelector('.app').prepend(toast);
-  });
-  await desktop.waitForTimeout(500);
-  await desktop.screenshot({ path: '/tmp/ss-winner-desktop-toast.png' });
-  console.log('2. Desktop winner with toast');
+  console.log('2. (Skipped toast screenshot - toast not shown for winners)');
 
   // Mobile winner
   const mobile = await browser.newPage({ viewport: { width: 375, height: 812 } });
@@ -111,7 +99,6 @@ const { chromium } = require('playwright-core');
 
     const wheel = document.getElementById('wheel');
     wheel.textContent = '🎉 Golden Dragon';
-    wheel.style.fontSize = '16px';
   });
 
   await mobile.waitForTimeout(500);
