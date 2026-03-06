@@ -1264,6 +1264,19 @@ button:focus-visible {
     inset 0 0 40px rgba(0, 0, 0, 0.5);
 }
 
+.no-results {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px 20px;
+  color: var(--color-text-dark);
+  font-size: 1.1rem;
+  line-height: 1.6;
+  opacity: 0.8;
+}
+
 .no-results strong {
   color: var(--color-burgundy-light);
 }
