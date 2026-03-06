@@ -1279,6 +1279,7 @@ button:focus-visible {
 
 .no-results strong {
   color: var(--color-burgundy-light);
+  margin-left: 0.25em;
 }
 
 /* ===== Safari iOS Fixes ===== */
