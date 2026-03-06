@@ -293,6 +293,13 @@ export default function App() {
       wheelEl.style.transform = `rotate(${wheelRotationRef.current}deg)`;
       setTimeout(() => {
         setWheelText(`🎉 ${chosen.name}`);
+
+        // Pan map to center on winner
+        if (mapRef.current && chosen.location) {
+          mapRef.current.panTo(chosen.location);
+          mapRef.current.setZoom(16);
+        }
+
         // Set all markers to burgundy, winner to gold with bounce
         markersRef.current.forEach((marker, idx) => {
           const isWinner = idx === chosenIndex;
