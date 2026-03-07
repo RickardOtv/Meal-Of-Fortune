@@ -292,6 +292,11 @@ export default function App() {
       wheelEl.style.transition = "transform 2s ease-out";
       wheelEl.style.transform = `rotate(${wheelRotationRef.current}deg)`;
       setTimeout(() => {
+        // Reset wheel rotation so winner text is readable (not upside down)
+        wheelEl.style.transition = "none";
+        wheelRotationRef.current = 0;
+        wheelEl.style.transform = "rotate(0deg)";
+
         setWheelText(`🎉 ${chosen.name}`);
 
         // Pan map to center on winner
