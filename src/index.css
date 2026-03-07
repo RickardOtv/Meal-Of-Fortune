@@ -189,7 +189,9 @@ h1::after {
 }
 
 .dragbar-controls button {
-  width: 150px;
+  min-width: 120px;
+  max-width: 180px;
+  width: auto;
   margin-top: 10px;
   font-size: 18px;
   padding: 8px 16px;
@@ -803,25 +805,25 @@ button.spin-btn:hover {
   }
 
   .map-bg {
-    height: 500px;
+    height: 400px;
     padding: 16px;
     min-width: 100%;
   }
 
   .sidebar-bg {
-    height: 400px;
-    min-height: 400px;
-    max-height: 400px;
+    height: 350px;
+    min-height: 350px;
+    max-height: 350px;
     padding: 12px;
     overflow: hidden;
   }
 
   #wheel {
-    width: 240px;
-    height: 240px;
+    width: 220px;
+    height: 220px;
     aspect-ratio: 1 / 1;
-    font-size: 22px;
-    padding: 20px;
+    font-size: 20px;
+    padding: 18px;
     box-sizing: border-box;
   }
 
@@ -829,7 +831,7 @@ button.spin-btn:hover {
     width: 100%;
     min-width: 0 !important;
     height: 100%;
-    height: 460px;
+    height: 360px;
   }
 
   .sidebar {
@@ -867,14 +869,14 @@ button.spin-btn:hover {
   }
 
   .map-bg {
-    height: 450px;
+    height: 350px;
     padding: 12px;
   }
 
   .sidebar-bg {
-    height: 380px;
-    min-height: 380px;
-    max-height: 380px;
+    height: 320px;
+    min-height: 320px;
+    max-height: 320px;
     padding: 10px;
     overflow: hidden;
   }
@@ -913,7 +915,9 @@ button.spin-btn:hover {
   }
 
   .dragbar-controls button {
-    width: 130px;
+    min-width: 100px;
+    max-width: 150px;
+    width: auto;
     font-size: 16px;
   }
 }
@@ -929,14 +933,14 @@ button.spin-btn:hover {
   }
 
   .map-bg {
-    height: 380px;
+    height: 320px;
     padding: 10px;
   }
 
   .sidebar-bg {
-    height: 340px;
-    min-height: 340px;
-    max-height: 340px;
+    height: 300px;
+    min-height: 300px;
+    max-height: 300px;
     padding: 8px;
     overflow: hidden;
   }
@@ -1113,6 +1117,169 @@ button.spin-btn:hover {
 .help-modal-close:hover {
   background: var(--color-burgundy);
   color: var(--color-parchment);
+}
+
+/* ===== Toast Notification ===== */
+.toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1rem;
+  font-weight: 600;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 500px;
+  width: calc(100% - 40px);
+  animation: toast-slide-in 0.3s ease-out;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+@keyframes toast-slide-in {
+  from { transform: translateX(-50%) translateY(-20px); opacity: 0; }
+  to { transform: translateX(-50%) translateY(0); opacity: 1; }
+}
+
+.toast-info {
+  background: linear-gradient(135deg, var(--color-parchment) 0%, var(--color-parchment-dark) 100%);
+  border: 2px solid var(--color-gold);
+  color: var(--color-text-dark);
+}
+
+.toast-error {
+  background: linear-gradient(135deg, #3d1a1a 0%, #2d1010 100%);
+  border: 2px solid #c0392b;
+  color: #f4e4c1;
+}
+
+.toast-close {
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0 4px !important;
+  margin: 0 !important;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+  flex-shrink: 0;
+  color: inherit;
+}
+
+.toast-close:hover {
+  opacity: 1;
+  background: none !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+/* ===== Skeleton Loader ===== */
+.skeleton-list {
+  padding: 0;
+  flex: 1;
+}
+
+.skeleton-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border-bottom: 1px solid rgba(184, 134, 11, 0.3);
+}
+
+.skeleton-checkbox {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  background: rgba(184, 134, 11, 0.15);
+  flex-shrink: 0;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+.skeleton-photo {
+  width: 70px;
+  height: 70px;
+  border-radius: 8px;
+  background: rgba(184, 134, 11, 0.15);
+  flex-shrink: 0;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+  animation-delay: 0.1s;
+}
+
+.skeleton-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.skeleton-line {
+  height: 14px;
+  border-radius: 4px;
+  background: rgba(184, 134, 11, 0.15);
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+.skeleton-line-name {
+  width: 65%;
+  height: 18px;
+  animation-delay: 0.2s;
+}
+
+.skeleton-line-addr {
+  width: 85%;
+  animation-delay: 0.3s;
+}
+
+.skeleton-line-price {
+  width: 30%;
+  animation-delay: 0.4s;
+}
+
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.7; }
+}
+
+/* ===== Focus Visible ===== */
+*:focus-visible {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 2px;
+}
+
+button:focus-visible {
+  outline: 2px solid var(--color-gold-light);
+  outline-offset: 2px;
+}
+
+#wheel:focus-visible {
+  box-shadow:
+    0 0 0 4px var(--color-gold-light),
+    0 0 80px rgba(212, 175, 55, 0.6),
+    inset 0 0 40px rgba(0, 0, 0, 0.5);
+}
+
+.no-results {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px 20px;
+  color: var(--color-text-dark);
+  font-size: 1.1rem;
+  line-height: 1.6;
+  opacity: 0.8;
+}
+
+.no-results strong {
+  color: var(--color-burgundy-light);
+  margin-left: 0.25em;
 }
 
 /* ===== Safari iOS Fixes ===== */

@@ -34,7 +34,7 @@ export default function Wheel({
   return (
     <section className="wheel-section">
       <div className="wheel-bg">
-        <div id="wheel" onClick={spinWheel}>
+        <div id="wheel" onClick={spinWheel} role="button" tabIndex={0} aria-label="Spin the wheel" onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); spinWheel(); } }}>
           {wheelText}
         </div>
         <div className="dragbar-controls">

@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { Loader } from "@googlemaps/js-api-loader";
 import confetti from "canvas-confetti";
 import "./index.css";
@@ -21,22 +21,46 @@ function priceToSymbols(priceLevel) {
   return priceLabels[priceLevel] || "";
 }
 
+// Load persisted filters from localStorage
+function loadFilters() {
+  try {
+    const saved = localStorage.getItem("mof-filters");
+    if (saved) return JSON.parse(saved);
+  } catch { /* ignore */ }
+  return { isOpen: true, isRestaurant: true, isCafe: false };
+}
+
 export default function App() {
   // ===== State and Refs =====
   const mapRef = useRef(null);         // Google Map instance
   const infoWindowRef = useRef(null);  // Info window for markers
   const markersRef = useRef([]);       // Restaurant markers
+  const wheelRotationRef = useRef(0);  // Cumulative wheel rotation
 
   const [restaurants, setRestaurants] = useState([]); // List of found restaurants
   const [wheelText, setWheelText] = useState("🎡 Spin Me"); // Wheel display text
   const [selectedIndexes, setSelectedIndexes] = useState([]); // Selected restaurants
   const [isSearching, setIsSearching] = useState(false); // Loading state for search
-  const [filters, setFilters] = useState({
-    isOpen: true,
-    isRestaurant: true,
-    isCafe: false,
-  });
+  const [hasSearched, setHasSearched] = useState(false); // Whether user has searched at least once
+  const [filters, setFilters] = useState(loadFilters);
   const [showHelp, setShowHelp] = useState(false);
+  const [toast, setToast] = useState(null); // { message, type: 'info' | 'error' }
+
+  // Persist filters to localStorage
+  useEffect(() => {
+    try { localStorage.setItem("mof-filters", JSON.stringify(filters)); } catch { /* ignore */ }
+  }, [filters]);
+
+  // Toast auto-dismiss
+  useEffect(() => {
+    if (!toast) return;
+    const timer = setTimeout(() => setToast(null), 4000);
+    return () => clearTimeout(timer);
+  }, [toast]);
+
+  const showToast = useCallback((message, type = "info") => {
+    setToast({ message, type });
+  }, []);
 
   // ===== Initialize Google Map on mount =====
   useEffect(() => {
@@ -86,6 +110,7 @@ export default function App() {
         (error) => {
           console.log("Geolocation error:", error.message);
           setup({ lat: 40.7128, lng: -74.006 }, 14);
+          showToast("Could not detect your location. Showing New York City.", "info");
         },
         {
           enableHighAccuracy: true,
@@ -96,6 +121,7 @@ export default function App() {
     } else {
       console.log("Geolocation not supported");
       setup({ lat: 40.7128, lng: -74.006 }, 14);
+      showToast("Geolocation not supported. Showing New York City.", "info");
     }
   }
 
@@ -145,6 +171,7 @@ export default function App() {
       console.log("API Response:", data);
       if (data.error) {
         console.error("API Error:", data.error);
+        showToast("Search failed: " + (data.error.message || "Unknown error"), "error");
         break;
       }
       allPlaces.push(...(data.places || []));
@@ -193,7 +220,12 @@ export default function App() {
     // Fetch restaurants within visible map bounds
     const items = await fetchRestaurants(bounds, filters);
     setIsSearching(false);
+    setHasSearched(true);
     setRestaurants(items);
+
+    if (items.length === 0) {
+      showToast("No restaurants found in this area. Try moving the map or adjusting filters.", "info");
+    }
     setWheelText("🎡 Spin Me");
     setSelectedIndexes(items.map((_, i) => i)); // Select all by default
 
@@ -255,23 +287,60 @@ export default function App() {
 
     if (wheelEl) {
       const spins = Math.floor(Math.random() * 3) + 5;
-      const degrees = spins * 360;
+      const degrees = spins * 360 + Math.floor(Math.random() * 360);
+      wheelRotationRef.current += degrees;
       wheelEl.style.transition = "transform 2s ease-out";
-      wheelEl.style.transform = `rotate(${degrees}deg)`;
+      wheelEl.style.transform = `rotate(${wheelRotationRef.current}deg)`;
       setTimeout(() => {
-        setWheelText(`🎉 ${chosen.name}`);
+        // Reset wheel rotation so winner text is readable (not upside down)
         wheelEl.style.transition = "none";
+        wheelRotationRef.current = 0;
         wheelEl.style.transform = "rotate(0deg)";
-        // Set all markers to burgundy, winner to gold
+
+        setWheelText(`🎉 ${chosen.name}`);
+
+        // Pan map to center on winner
+        if (mapRef.current && chosen.location) {
+          mapRef.current.panTo(chosen.location);
+          mapRef.current.setZoom(16);
+        }
+
+        // Set all markers to burgundy, winner to gold with bounce
         markersRef.current.forEach((marker, idx) => {
+          const isWinner = idx === chosenIndex;
           marker.setIcon({
             path: window.google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
-            fillColor: idx === chosenIndex ? "#d4af37" : "#6b2d5c",
+            fillColor: isWinner ? "#d4af37" : "#6b2d5c",
             fillOpacity: 1,
             strokeWeight: 2,
             strokeColor: "#2d1b2e",
-            scale: 4,
+            scale: isWinner ? 6 : 4,
           });
+          if (isWinner) {
+            // Bounce animation: scale up then back
+            setTimeout(() => {
+              marker.setIcon({
+                path: window.google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
+                fillColor: "#d4af37",
+                fillOpacity: 1,
+                strokeWeight: 2,
+                strokeColor: "#2d1b2e",
+                scale: 8,
+              });
+              setTimeout(() => {
+                marker.setIcon({
+                  path: window.google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
+                  fillColor: "#d4af37",
+                  fillOpacity: 1,
+                  strokeWeight: 2,
+                  strokeColor: "#2d1b2e",
+                  scale: 6,
+                });
+              }, 200);
+            }, 100);
+            // Auto-open info window on winner
+            window.google.maps.event.trigger(marker, "click");
+          }
         });
 
         // Trigger confetti effect with gothic colors
@@ -342,6 +411,15 @@ export default function App() {
   return (
     <div className="app">
       <h1>🍽️ Meal of Fortune 🎡</h1>
+
+      {/* Toast notification */}
+      {toast && (
+        <div className={`toast toast-${toast.type}`} role="alert" aria-live="polite">
+          <span>{toast.message}</span>
+          <button className="toast-close" onClick={() => setToast(null)} aria-label="Dismiss notification">×</button>
+        </div>
+      )}
+
       <div className="main-layout">
         <Wheel
           wheelText={wheelText}
@@ -360,6 +438,8 @@ export default function App() {
           selectAllRestaurants={selectAllRestaurants}
           deselectAllRestaurants={deselectAllRestaurants}
           priceToSymbols={priceToSymbols}
+          isSearching={isSearching}
+          hasSearched={hasSearched}
         />
       </div>
       <div className="footer-links">
@@ -375,17 +455,19 @@ export default function App() {
           className="help-button"
           onClick={() => setShowHelp(true)}
           type="button"
+          aria-label="Help"
         >
           ?
         </button>
       </div>
       {showHelp && (
-        <div className="help-modal-overlay" onClick={() => setShowHelp(false)}>
+        <div className="help-modal-overlay" onClick={() => setShowHelp(false)} role="dialog" aria-modal="true" aria-label="How to use">
           <div className="help-modal" onClick={(e) => e.stopPropagation()}>
             <button
               className="help-modal-close"
               onClick={() => setShowHelp(false)}
               type="button"
+              aria-label="Close help"
             >
               ×
             </button>
