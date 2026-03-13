@@ -5,6 +5,7 @@ import "./index.css";
 import Wheel from "./components/Wheel";
 import Map from "./components/Map";
 import Sidebar from "./components/Sidebar";
+import FilterModal from "./components/FilterModal";
 
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
@@ -51,7 +52,15 @@ export default function App() {
   const [hasSearched, setHasSearched] = useState(false); // Whether user has searched at least once
   const [filters, setFilters] = useState(loadFilters);
   const [showHelp, setShowHelp] = useState(false);
+  const [showFilterModal, setShowFilterModal] = useState(false);
   const [toast, setToast] = useState(null); // { message, type: 'info' | 'error' }
+
+  // Count active filters beyond defaults
+  const activeFilterCount = [
+    (filters.priceLevels?.length || 0) > 0,
+    filters.minRating > 0,
+    filters.cuisineType !== "",
+  ].filter(Boolean).length;
 
   // Persist filters to localStorage
   useEffect(() => {
@@ -443,8 +452,8 @@ export default function App() {
           wheelText={wheelText}
           spinWheel={spinWheel}
           searchRestaurants={() => searchRestaurants(window.google)}
-          filters={filters}
-          setFilters={setFilters}
+          onOpenFilters={() => setShowFilterModal(true)}
+          activeFilterCount={activeFilterCount}
           isSearching={isSearching}
         />
         <Map />
@@ -499,6 +508,13 @@ export default function App() {
             </ol>
           </div>
         </div>
+      )}
+      {showFilterModal && (
+        <FilterModal
+          filters={filters}
+          onApply={setFilters}
+          onClose={() => setShowFilterModal(false)}
+        />
       )}
     </div>
   );
