@@ -27,7 +27,14 @@ function loadFilters() {
     const saved = localStorage.getItem("mof-filters");
     if (saved) return JSON.parse(saved);
   } catch { /* ignore */ }
-  return { isOpen: true, isRestaurant: true, isCafe: false };
+  return {
+    isOpen: true,
+    isRestaurant: true,
+    isCafe: false,
+    priceLevels: [],      // empty = any price
+    minRating: 0,         // 0 = any rating
+    cuisineType: "",       // "" = no cuisine filter
+  };
 }
 
 export default function App() {
@@ -150,6 +157,7 @@ export default function App() {
             high: { latitude: ne.lat(), longitude: ne.lng() }
           }
         },
+        ...(appliedFilters.cuisineType && { includedType: appliedFilters.cuisineType }),
         ...(pageToken && { pageToken })
       };
 
@@ -204,6 +212,16 @@ export default function App() {
     // Apply "Open Now" filter if enabled
     if (appliedFilters.isOpen) {
       places = places.filter(place => place.isOpen);
+    }
+
+    // Apply price level filter if any selected
+    if (appliedFilters.priceLevels && appliedFilters.priceLevels.length > 0) {
+      places = places.filter(place => place.priceLevel && appliedFilters.priceLevels.includes(place.priceLevel));
+    }
+
+    // Apply minimum rating filter
+    if (appliedFilters.minRating > 0) {
+      places = places.filter(place => place.rating && place.rating >= appliedFilters.minRating);
     }
 
     return places;
