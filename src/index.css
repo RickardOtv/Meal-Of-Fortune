@@ -419,7 +419,7 @@ h1::after {
   background: var(--color-cream);
   color: var(--color-secondary-dark);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
   text-align: center;
   box-sizing: border-box;
 }
@@ -433,7 +433,14 @@ h1::after {
   background: linear-gradient(135deg, var(--color-burgundy-light), var(--color-burgundy));
   color: var(--color-parchment);
   border-color: var(--color-gold);
-  box-shadow: 0 0 8px rgba(212, 175, 55, 0.3);
+}
+
+.filter-chip.active:hover {
+  background: linear-gradient(135deg, var(--color-burgundy), var(--color-burgundy-light));
+}
+
+.filter-chip:focus-visible {
+  outline: none;
 }
 
 /* Footer */
