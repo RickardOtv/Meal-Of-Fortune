@@ -5,6 +5,7 @@ import "./index.css";
 import Wheel from "./components/Wheel";
 import Map from "./components/Map";
 import Sidebar from "./components/Sidebar";
+import FilterModal from "./components/FilterModal";
 
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
@@ -27,7 +28,14 @@ function loadFilters() {
     const saved = localStorage.getItem("mof-filters");
     if (saved) return JSON.parse(saved);
   } catch { /* ignore */ }
-  return { isOpen: true, isRestaurant: true, isCafe: false };
+  return {
+    isOpen: true,
+    isRestaurant: true,
+    isCafe: false,
+    priceLevels: [],      // empty = any price
+    minRating: 0,         // 0 = any rating
+    cuisineType: "",       // "" = no cuisine filter
+  };
 }
 
 export default function App() {
@@ -44,7 +52,15 @@ export default function App() {
   const [hasSearched, setHasSearched] = useState(false); // Whether user has searched at least once
   const [filters, setFilters] = useState(loadFilters);
   const [showHelp, setShowHelp] = useState(false);
+  const [showFilterModal, setShowFilterModal] = useState(false);
   const [toast, setToast] = useState(null); // { message, type: 'info' | 'error' }
+
+  // Count active filters beyond defaults
+  const activeFilterCount = [
+    (filters.priceLevels?.length || 0) > 0,
+    filters.minRating > 0,
+    filters.cuisineType !== "",
+  ].filter(Boolean).length;
 
   // Persist filters to localStorage
   useEffect(() => {
@@ -150,6 +166,7 @@ export default function App() {
             high: { latitude: ne.lat(), longitude: ne.lng() }
           }
         },
+        ...(appliedFilters.cuisineType && { includedType: appliedFilters.cuisineType }),
         ...(pageToken && { pageToken })
       };
 
@@ -204,6 +221,16 @@ export default function App() {
     // Apply "Open Now" filter if enabled
     if (appliedFilters.isOpen) {
       places = places.filter(place => place.isOpen);
+    }
+
+    // Apply price level filter if any selected
+    if (appliedFilters.priceLevels && appliedFilters.priceLevels.length > 0) {
+      places = places.filter(place => place.priceLevel && appliedFilters.priceLevels.includes(place.priceLevel));
+    }
+
+    // Apply minimum rating filter
+    if (appliedFilters.minRating > 0) {
+      places = places.filter(place => place.rating && place.rating >= appliedFilters.minRating);
     }
 
     return places;
@@ -425,8 +452,8 @@ export default function App() {
           wheelText={wheelText}
           spinWheel={spinWheel}
           searchRestaurants={() => searchRestaurants(window.google)}
-          filters={filters}
-          setFilters={setFilters}
+          onOpenFilters={() => setShowFilterModal(true)}
+          activeFilterCount={activeFilterCount}
           isSearching={isSearching}
         />
         <Map />
@@ -481,6 +508,13 @@ export default function App() {
             </ol>
           </div>
         </div>
+      )}
+      {showFilterModal && (
+        <FilterModal
+          filters={filters}
+          onApply={setFilters}
+          onClose={() => setShowFilterModal(false)}
+        />
       )}
     </div>
   );
