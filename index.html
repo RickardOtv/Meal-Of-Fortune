@@ -109,7 +109,29 @@
     </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Pre-render content for SEO — React replaces this on mount -->
+      <div style="padding: 40px 20px; text-align: center; font-family: Georgia, serif; background: #1a0f1e; color: #f4e4c1; min-height: 100vh;">
+        <header>
+          <h1 style="color: #d4af37; font-size: 2rem; margin-bottom: 8px;">Meal of Fortune</h1>
+          <p style="color: #c9b896; font-size: 1.1rem;">Spin the Wheel to Find Where to Eat</p>
+        </header>
+        <main style="max-width: 640px; margin: 40px auto; text-align: left; line-height: 1.7;">
+          <h2 style="color: #d4af37; font-size: 1.3rem;">How It Works</h2>
+          <p>Can't decide where to eat? Meal of Fortune takes the stress out of choosing. Navigate the map to your area, search for nearby restaurants, and spin the fortune wheel — it randomly picks a restaurant for you.</p>
+          <h2 style="color: #d4af37; font-size: 1.3rem;">Features</h2>
+          <ul style="padding-left: 20px;">
+            <li>Interactive fortune wheel that randomly selects a nearby restaurant</li>
+            <li>Google Maps integration with real-time restaurant data</li>
+            <li>Filter by cuisine type, price range, rating, and open status</li>
+            <li>Search restaurants and cafes in any location worldwide</li>
+            <li>Fun confetti celebration when the wheel picks your meal</li>
+          </ul>
+          <h2 style="color: #d4af37; font-size: 1.3rem;">Free Restaurant Picker</h2>
+          <p>Meal of Fortune is a free web app that helps groups and individuals decide where to eat. Whether you're looking for nearby restaurants, a specific cuisine, or just want to try something new — spin the wheel and let fortune decide.</p>
+        </main>
+      </div>
+    </div>
     <noscript>
       <div style="padding: 40px; text-align: center; font-family: Georgia, serif; background: #1a0f1e; color: #f4e4c1; min-height: 100vh;">
         <h1 style="color: #d4af37;">Meal of Fortune</h1>
