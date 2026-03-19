@@ -16,7 +16,7 @@ export default function Sidebar({
           <h2>Found Restaurants</h2>
         </div>
 
-        {/* Skeleton loader while searching */}
+        {/* Skeleton loader overlaid while searching */}
         {isSearching && (
           <div className="skeleton-list" aria-label="Loading restaurants">
             {[...Array(5)].map((_, i) => (
@@ -47,41 +47,39 @@ export default function Sidebar({
           </p>
         )}
 
-        {/* Restaurant list */}
-        {!isSearching && restaurants.length > 0 && (
-          <ul>
-            {restaurants.map((restaurant, index) => (
-              <li
-                key={restaurant.id ?? index}
-                className="restaurant-item"
-                onClick={() => focusRestaurant(index, window.google)}
-              >
-                <input
-                  type="checkbox"
-                  checked={selectedIndexes.includes(index)}
-                  onClick={(event) => event.stopPropagation()}
-                  onChange={() => handleCheckboxChange(index)}
-                  className="restaurant-checkbox"
-                  aria-label={`Select ${restaurant.name}`}
+        {/* Restaurant list - always mounted to preserve scroll position */}
+        <ul style={{ display: !isSearching && restaurants.length > 0 ? undefined : 'none' }}>
+          {restaurants.map((restaurant, index) => (
+            <li
+              key={restaurant.id ?? index}
+              className="restaurant-item"
+              onClick={() => focusRestaurant(index, window.google)}
+            >
+              <input
+                type="checkbox"
+                checked={selectedIndexes.includes(index)}
+                onClick={(event) => event.stopPropagation()}
+                onChange={() => handleCheckboxChange(index)}
+                className="restaurant-checkbox"
+                aria-label={`Select ${restaurant.name}`}
+              />
+              {restaurant.photoUrl && (
+                <img
+                  src={restaurant.photoUrl}
+                  alt={restaurant.name}
+                  className="restaurant-photo"
                 />
-                {restaurant.photoUrl && (
-                  <img
-                    src={restaurant.photoUrl}
-                    alt={restaurant.name}
-                    className="restaurant-photo"
-                  />
-                )}
-                <div className="restaurant-details">
-                  <strong>{restaurant.name}</strong>
-                  <br />
-                  <small>{restaurant.address}</small>
-                  <br />
-                  <small>{priceToSymbols(restaurant.priceLevel)}</small>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
+              )}
+              <div className="restaurant-details">
+                <strong>{restaurant.name}</strong>
+                <br />
+                <small>{restaurant.address}</small>
+                <br />
+                <small>{priceToSymbols(restaurant.priceLevel)}</small>
+              </div>
+            </li>
+          ))}
+        </ul>
 
         <div className="select-controls-bottom">
           <button type="button" onClick={selectAllRestaurants}>
