@@ -141,9 +141,9 @@ export default function App() {
           path: google.maps.SymbolPath.CIRCLE,
           fillColor: GOLD,
           fillOpacity: 1,
-          strokeWeight: 3,
+          strokeWeight: 4,
           strokeColor: NAVY_900,
-          scale: 8,
+          scale: 10,
         },
       });
 
@@ -246,7 +246,7 @@ export default function App() {
       rating: place.rating,
       priceLevel: place.priceLevel,
       photoUrl: place.photos?.[0]
-        ? `https://places.googleapis.com/v1/${place.photos[0].name}/media?key=${GOOGLE_MAPS_API_KEY}&maxHeightPx=120&maxWidthPx=120`
+        ? `https://places.googleapis.com/v1/${place.photos[0].name}/media?key=${GOOGLE_MAPS_API_KEY}&maxHeightPx=320&maxWidthPx=480`
         : null,
       mapsUrl: place.googleMapsUri,
       isOpen: place.currentOpeningHours?.openNow === true,
@@ -299,23 +299,28 @@ export default function App() {
         title: r.name,
         icon: {
           path: google.maps.SymbolPath.CIRCLE,
-          fillColor: NAVY_500,
+          fillColor: NAVY_900,
           fillOpacity: 1,
-          strokeWeight: 2,
-          strokeColor: "#ffffff",
-          scale: 7,
+          strokeWeight: 3,
+          strokeColor: GOLD,
+          scale: 10,
         },
       });
 
       marker.addListener("click", () => {
         const div = document.createElement("div");
-        div.style.maxWidth = "260px";
-        div.style.padding = "14px 16px";
+        div.style.width = "260px";
+        div.style.margin = "-12px";
+        div.style.overflow = "hidden";
+        div.style.borderRadius = "10px";
         div.style.fontFamily = "-apple-system, BlinkMacSystemFont, sans-serif";
         div.innerHTML = `
-          <div style="font-weight:700; color:#0b1a33; font-size:15px; margin-bottom:6px; letter-spacing:-0.01em;">${r.name}</div>
-          <div style="color:#4a5568; font-size:12px; margin-bottom:10px; line-height:1.5;">${r.address}</div>
-          ${r.mapsUrl ? `<a href="${r.mapsUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-block; color:#0b1a33; font-weight:600; text-decoration:none; font-size:12px; padding:6px 12px; background:#f0ead9; border-radius:999px;">Open in Google Maps →</a>` : ""}
+          ${r.photoUrl ? `<img src="${r.photoUrl}" alt="${r.name}" style="display:block; width:100%; height:140px; object-fit:cover;" />` : ""}
+          <div style="padding:14px 16px;">
+            <div style="font-weight:700; color:#0b1a33; font-size:15px; margin-bottom:6px; letter-spacing:-0.01em;">${r.name}</div>
+            <div style="color:#4a5568; font-size:12px; margin-bottom:10px; line-height:1.5;">${r.address}</div>
+            ${r.mapsUrl ? `<a href="${r.mapsUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-block; color:#0b1a33; font-weight:600; text-decoration:none; font-size:12px; padding:6px 12px; background:#f0ead9; border-radius:999px;">Open in Google Maps →</a>` : ""}
+          </div>
         `;
         iw.setContent(div);
         iw.open({ map: mapRef.current, anchor: marker });
@@ -364,11 +369,11 @@ export default function App() {
         const isWinner = idx === chosenIndex;
         marker.setIcon({
           path: window.google.maps.SymbolPath.CIRCLE,
-          fillColor: isWinner ? GOLD : NAVY_500,
+          fillColor: isWinner ? GOLD : NAVY_900,
           fillOpacity: 1,
-          strokeWeight: 2,
-          strokeColor: "#ffffff",
-          scale: isWinner ? 11 : 7,
+          strokeWeight: isWinner ? 4 : 3,
+          strokeColor: isWinner ? NAVY_900 : GOLD,
+          scale: isWinner ? 14 : 10,
         });
         if (isWinner) {
           window.google.maps.event.trigger(marker, "click");
