@@ -333,11 +333,11 @@ export default function App() {
           ${r.photoUrl ? `<img src="${r.photoUrl}" alt="${r.name}" style="display:block;width:100%;height:100px;object-fit:cover;border-radius:6px;margin-bottom:10px;" />` : ""}
           <div style="font-weight:700;color:#0b1a33;font-size:14px;margin-bottom:4px;line-height:1.3;">${r.name}</div>
           <div style="color:#4a5568;font-size:11px;margin-bottom:10px;line-height:1.4;">${r.address}</div>
-          <div style="display:flex;gap:6px;flex-wrap:wrap;">
-            <button type="button" data-toggle style="cursor:pointer;border:none;color:#fff;font-weight:600;font-size:11px;padding:6px 12px;border-radius:999px;background:${isSelected ? "#0b1a33" : "#8a90a0"};">
+          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+            <button type="button" data-toggle style="cursor:pointer;border:none;color:#fff;font-weight:600;font-size:11px;padding:6px 0;border-radius:999px;min-width:86px;text-align:center;background:${isSelected ? "#0b1a33" : "#8a90a0"};">
               ${isSelected ? "Selected" : "Deselected"}
             </button>
-            ${r.mapsUrl ? `<a href="${r.mapsUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-block;color:#0b1a33;font-weight:600;text-decoration:none;font-size:11px;padding:5px 10px;background:#f0ead9;border-radius:999px;">Open in Maps →</a>` : ""}
+            ${r.mapsUrl ? `<a href="${r.mapsUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-block;color:#0b1a33;font-weight:600;text-decoration:none;font-size:11px;padding:6px 12px;background:#f0ead9;border-radius:999px;">Open in Google Maps →</a>` : ""}
           </div>
         `;
         div.querySelector("[data-toggle]")?.addEventListener("click", () => {
