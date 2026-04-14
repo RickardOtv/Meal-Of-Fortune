@@ -70,6 +70,7 @@ export default function App() {
   const infoWindowRef = useRef(null);
   const markersRef = useRef([]);
   const wheelRotationRef = useRef(0);
+  const isSpinningRef = useRef(false);
 
   const [restaurants, setRestaurants] = useState([]);
   const [wheelText, setWheelText] = useState("Spin Me");
@@ -327,86 +328,87 @@ export default function App() {
   function openWheel() {
     if (selectedIndexes.length === 0) return;
     setWheelText("Spin Me");
+    wheelRotationRef.current = 0;
+    isSpinningRef.current = false;
     setShowWheel(true);
-    // Auto-spin shortly after the modal pop-in animation finishes
-    setTimeout(() => spinWheel(), 450);
   }
 
   function spinWheel() {
+    if (isSpinningRef.current) return;
     if (selectedIndexes.length === 0) {
       setWheelText("Select at least one");
       return;
     }
     const wheelEl = document.getElementById("wheel");
+    if (!wheelEl) return;
+
+    isSpinningRef.current = true;
     const chosenIndex = selectedIndexes[Math.floor(Math.random() * selectedIndexes.length)];
     const chosen = restaurants[chosenIndex];
 
-    if (wheelEl) {
-      const spins = Math.floor(Math.random() * 3) + 5;
-      const degrees = spins * 360 + Math.floor(Math.random() * 360);
-      wheelRotationRef.current += degrees;
-      wheelEl.style.transition = "transform 2s ease-out";
-      wheelEl.style.transform = `rotate(${wheelRotationRef.current}deg)`;
-      setTimeout(() => {
-        wheelEl.style.transition = "none";
-        wheelRotationRef.current = 0;
-        wheelEl.style.transform = "rotate(0deg)";
+    const spins = Math.floor(Math.random() * 3) + 5;
+    const degrees = spins * 360 + Math.floor(Math.random() * 360);
+    wheelRotationRef.current += degrees;
+    wheelEl.style.transition = "transform 2.6s cubic-bezier(0.17, 0.67, 0.2, 1)";
+    wheelEl.style.transform = `rotate(${wheelRotationRef.current}deg)`;
 
-        setWheelText(chosen.name);
+    setTimeout(() => {
+      setWheelText(chosen.name);
 
-        if (mapRef.current && chosen.location) {
-          mapRef.current.panTo(chosen.location);
-          mapRef.current.setZoom(16);
-        }
+      if (mapRef.current && chosen.location) {
+        mapRef.current.panTo(chosen.location);
+        mapRef.current.setZoom(16);
+      }
 
-        markersRef.current.forEach((marker, idx) => {
-          const isWinner = idx === chosenIndex;
-          marker.setIcon({
-            path: window.google.maps.SymbolPath.CIRCLE,
-            fillColor: isWinner ? GOLD : NAVY_500,
-            fillOpacity: 1,
-            strokeWeight: 2,
-            strokeColor: "#ffffff",
-            scale: isWinner ? 11 : 7,
-          });
-          if (isWinner) {
-            window.google.maps.event.trigger(marker, "click");
-          }
+      markersRef.current.forEach((marker, idx) => {
+        const isWinner = idx === chosenIndex;
+        marker.setIcon({
+          path: window.google.maps.SymbolPath.CIRCLE,
+          fillColor: isWinner ? GOLD : NAVY_500,
+          fillOpacity: 1,
+          strokeWeight: 2,
+          strokeColor: "#ffffff",
+          scale: isWinner ? 11 : 7,
         });
+        if (isWinner) {
+          window.google.maps.event.trigger(marker, "click");
+        }
+      });
 
-        // Close wheel modal after a beat so user sees the winner
-        setTimeout(() => setShowWheel(false), 1800);
+      setTimeout(() => {
+        setShowWheel(false);
+        isSpinningRef.current = false;
+      }, 1800);
 
-        const duration = 2000;
-        const end = Date.now() + duration;
-        const frame = () => {
-          confetti({
-            particleCount: 3,
-            angle: 60,
-            spread: 60,
-            origin: { x: 0 },
-            colors: [GOLD, GOLD_LIGHT, "#ffffff", NAVY_500, NAVY_900],
-            ticks: 200,
-            gravity: 0.8,
-            decay: 0.94,
-            startVelocity: 30,
-          });
-          confetti({
-            particleCount: 3,
-            angle: 120,
-            spread: 60,
-            origin: { x: 1 },
-            colors: [GOLD, GOLD_LIGHT, "#ffffff", NAVY_500, NAVY_900],
-            ticks: 200,
-            gravity: 0.8,
-            decay: 0.94,
-            startVelocity: 30,
-          });
-          if (Date.now() < end) requestAnimationFrame(frame);
-        };
-        frame();
-      }, 2000);
-    }
+      const duration = 2000;
+      const end = Date.now() + duration;
+      const frame = () => {
+        confetti({
+          particleCount: 3,
+          angle: 60,
+          spread: 60,
+          origin: { x: 0 },
+          colors: [GOLD, GOLD_LIGHT, "#ffffff", NAVY_500, NAVY_900],
+          ticks: 200,
+          gravity: 0.8,
+          decay: 0.94,
+          startVelocity: 30,
+        });
+        confetti({
+          particleCount: 3,
+          angle: 120,
+          spread: 60,
+          origin: { x: 1 },
+          colors: [GOLD, GOLD_LIGHT, "#ffffff", NAVY_500, NAVY_900],
+          ticks: 200,
+          gravity: 0.8,
+          decay: 0.94,
+          startVelocity: 30,
+        });
+        if (Date.now() < end) requestAnimationFrame(frame);
+      };
+      frame();
+    }, 2600);
   }
 
   function focusRestaurant(index, google) {
@@ -440,7 +442,7 @@ export default function App() {
       <div className="top-actions">
         <button
           type="button"
-          className="icon-button"
+          className="icon-button primary"
           onClick={() => setShowHelp(true)}
           aria-label="Help"
           title="Help"
@@ -500,15 +502,6 @@ export default function App() {
         onSearch={() => searchRestaurants(window.google)}
         onSpin={openWheel}
       />
-
-      <a
-        href="https://github.com/RickardOtv"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="credit-link"
-      >
-        Made by RickardOtv
-      </a>
 
       {showWheel && (
         <Wheel

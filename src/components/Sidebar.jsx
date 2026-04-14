@@ -38,6 +38,14 @@ export default function Sidebar({
       <div className="panel-brand">
         <div className="brand-mark" />
         <span>Meal of Fortune</span>
+        <a
+          className="panel-credit"
+          href="https://github.com/RickardOtv"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          by RickardOtv
+        </a>
       </div>
       <div className="panel-header">
         <div>

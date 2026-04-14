@@ -386,6 +386,15 @@ a {
   overflow: hidden;
 }
 
+/* On desktop the search input sits near the bottom of the viewport, so flip
+   the autocomplete dropdown upward so it doesn't go off-screen. */
+@media (min-width: 769px) {
+  .pac-container {
+    transform: translateY(calc(-100% - 64px));
+    margin-top: 0 !important;
+  }
+}
+
 .pac-item {
   padding: 10px 14px !important;
   border-top: 1px solid var(--border) !important;
@@ -955,28 +964,19 @@ a {
   text-transform: uppercase;
 }
 
-.credit-link {
-  position: absolute;
-  bottom: 20px;
-  left: 20px;
-  padding: 6px 14px;
-  background: var(--surface);
-  backdrop-filter: var(--blur);
-  -webkit-backdrop-filter: var(--blur);
-  border: 1px solid var(--border);
-  border-radius: var(--r-pill);
-  box-shadow: var(--shadow-sm);
+.panel-credit {
+  margin-left: auto;
   font-size: 11px;
   font-weight: 500;
-  color: var(--text-secondary);
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--text-muted);
   text-decoration: none;
-  z-index: 10;
-  transition: color 0.15s ease, background 0.15s ease;
+  transition: color 0.15s ease;
 }
 
-.credit-link:hover {
+.panel-credit:hover {
   color: var(--navy-900);
-  background: var(--surface-strong);
 }
 
 /* ===== Toast ===== */
@@ -1397,10 +1397,6 @@ a {
     width: 260px;
     height: 260px;
     font-size: 22px;
-  }
-
-  .credit-link {
-    display: none;
   }
 
   .filter-modal {
