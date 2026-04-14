@@ -42,22 +42,26 @@ function loadFilters() {
   };
 }
 
-// Light map style — clean Apple-ish look
+// Light map style — clean Apple-ish look with enough contrast to read features
 const MAP_STYLE = [
-  { elementType: "geometry", stylers: [{ color: "#f5f5f7" }] },
+  { elementType: "geometry", stylers: [{ color: "#eef0f4" }] },
   { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
   { elementType: "labels.text.fill", stylers: [{ color: "#4a5568" }] },
   { elementType: "labels.text.stroke", stylers: [{ color: "#ffffff" }] },
   { featureType: "administrative.land_parcel", stylers: [{ visibility: "off" }] },
   { featureType: "administrative.neighborhood", stylers: [{ visibility: "off" }] },
   { featureType: "poi", stylers: [{ visibility: "off" }] },
-  { featureType: "poi.park", elementType: "geometry", stylers: [{ color: "#e8eee3" }] },
+  { featureType: "poi.park", elementType: "geometry", stylers: [{ color: "#d4e3cf" }] },
+  { featureType: "poi.park", elementType: "labels.text.fill", stylers: [{ color: "#4a6b3f" }] },
   { featureType: "road", elementType: "geometry", stylers: [{ color: "#ffffff" }] },
+  { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#d8dde5" }] },
   { featureType: "road.arterial", elementType: "geometry", stylers: [{ color: "#ffffff" }] },
-  { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#ffffff" }] },
-  { featureType: "road.highway", elementType: "geometry.stroke", stylers: [{ color: "#e4c574" }] },
+  { featureType: "road.arterial", elementType: "geometry.stroke", stylers: [{ color: "#c8ced9" }] },
+  { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#ffe4a8" }] },
+  { featureType: "road.highway", elementType: "geometry.stroke", stylers: [{ color: "#c9a348" }] },
+  { featureType: "road.local", elementType: "geometry", stylers: [{ color: "#ffffff" }] },
   { featureType: "transit", stylers: [{ visibility: "off" }] },
-  { featureType: "water", elementType: "geometry", stylers: [{ color: "#d5e2f0" }] },
+  { featureType: "water", elementType: "geometry", stylers: [{ color: "#a9c8e8" }] },
   { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#1e3a6b" }] },
 ];
 
@@ -324,6 +328,8 @@ export default function App() {
     if (selectedIndexes.length === 0) return;
     setWheelText("Spin Me");
     setShowWheel(true);
+    // Auto-spin shortly after the modal pop-in animation finishes
+    setTimeout(() => spinWheel(), 450);
   }
 
   function spinWheel() {
