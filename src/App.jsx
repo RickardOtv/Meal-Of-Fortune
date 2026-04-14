@@ -309,18 +309,12 @@ export default function App() {
 
       marker.addListener("click", () => {
         const div = document.createElement("div");
-        div.style.width = "240px";
-        div.style.margin = "-12px";
-        div.style.overflow = "hidden";
-        div.style.borderRadius = "8px";
-        div.style.fontFamily = "-apple-system, BlinkMacSystemFont, sans-serif";
+        div.style.cssText = "width:220px;font-family:-apple-system,BlinkMacSystemFont,sans-serif;";
         div.innerHTML = `
-          ${r.photoUrl ? `<img src="${r.photoUrl}" alt="${r.name}" style="display:block; width:100%; height:100px; object-fit:cover;" />` : ""}
-          <div style="padding:12px 14px 14px;">
-            <div style="font-weight:700; color:#0b1a33; font-size:14px; margin-bottom:4px; letter-spacing:-0.01em; line-height:1.3;">${r.name}</div>
-            <div style="color:#4a5568; font-size:11px; margin-bottom:10px; line-height:1.4;">${r.address}</div>
-            ${r.mapsUrl ? `<a href="${r.mapsUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-block; color:#0b1a33; font-weight:600; text-decoration:none; font-size:11px; padding:5px 10px; background:#f0ead9; border-radius:999px;">Open in Google Maps →</a>` : ""}
-          </div>
+          ${r.photoUrl ? `<img src="${r.photoUrl}" alt="${r.name}" style="display:block;width:100%;height:100px;object-fit:cover;border-radius:6px;margin-bottom:10px;" />` : ""}
+          <div style="font-weight:700;color:#0b1a33;font-size:14px;margin-bottom:4px;line-height:1.3;">${r.name}</div>
+          <div style="color:#4a5568;font-size:11px;margin-bottom:10px;line-height:1.4;">${r.address}</div>
+          ${r.mapsUrl ? `<a href="${r.mapsUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-block;color:#0b1a33;font-weight:600;text-decoration:none;font-size:11px;padding:5px 10px;background:#f0ead9;border-radius:999px;">Open in Google Maps →</a>` : ""}
         `;
         iw.setContent(div);
         iw.open({ map: mapRef.current, anchor: marker });

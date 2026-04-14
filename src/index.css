@@ -553,15 +553,23 @@ a {
   padding: 10px;
   border-radius: var(--r-md);
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: background 0.18s ease, transform 0.18s ease;
 }
 
 .restaurant-item:hover {
-  background: rgba(15, 23, 42, 0.05);
+  background: rgba(30, 58, 107, 0.1);
+}
+
+.restaurant-item:active {
+  transform: scale(0.99);
 }
 
 .restaurant-item.selected {
-  background: rgba(201, 163, 72, 0.1);
+  background: rgba(201, 163, 72, 0.16);
+}
+
+.restaurant-item.selected:hover {
+  background: rgba(201, 163, 72, 0.22);
 }
 
 .restaurant-checkbox {
