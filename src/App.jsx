@@ -147,7 +147,7 @@ export default function App() {
         },
       });
 
-      infoWindowRef.current = new InfoWindow();
+      infoWindowRef.current = new InfoWindow({ maxWidth: 280 });
 
       // Location autocomplete — pans map on place selection
       const input = document.getElementById("location-search");
@@ -301,25 +301,25 @@ export default function App() {
           path: google.maps.SymbolPath.CIRCLE,
           fillColor: NAVY_900,
           fillOpacity: 1,
-          strokeWeight: 3,
+          strokeWeight: 1.5,
           strokeColor: GOLD,
-          scale: 10,
+          scale: 9,
         },
       });
 
       marker.addListener("click", () => {
         const div = document.createElement("div");
-        div.style.width = "260px";
+        div.style.width = "240px";
         div.style.margin = "-12px";
         div.style.overflow = "hidden";
-        div.style.borderRadius = "10px";
+        div.style.borderRadius = "8px";
         div.style.fontFamily = "-apple-system, BlinkMacSystemFont, sans-serif";
         div.innerHTML = `
-          ${r.photoUrl ? `<img src="${r.photoUrl}" alt="${r.name}" style="display:block; width:100%; height:140px; object-fit:cover;" />` : ""}
-          <div style="padding:14px 16px;">
-            <div style="font-weight:700; color:#0b1a33; font-size:15px; margin-bottom:6px; letter-spacing:-0.01em;">${r.name}</div>
-            <div style="color:#4a5568; font-size:12px; margin-bottom:10px; line-height:1.5;">${r.address}</div>
-            ${r.mapsUrl ? `<a href="${r.mapsUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-block; color:#0b1a33; font-weight:600; text-decoration:none; font-size:12px; padding:6px 12px; background:#f0ead9; border-radius:999px;">Open in Google Maps →</a>` : ""}
+          ${r.photoUrl ? `<img src="${r.photoUrl}" alt="${r.name}" style="display:block; width:100%; height:100px; object-fit:cover;" />` : ""}
+          <div style="padding:12px 14px 14px;">
+            <div style="font-weight:700; color:#0b1a33; font-size:14px; margin-bottom:4px; letter-spacing:-0.01em; line-height:1.3;">${r.name}</div>
+            <div style="color:#4a5568; font-size:11px; margin-bottom:10px; line-height:1.4;">${r.address}</div>
+            ${r.mapsUrl ? `<a href="${r.mapsUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-block; color:#0b1a33; font-weight:600; text-decoration:none; font-size:11px; padding:5px 10px; background:#f0ead9; border-radius:999px;">Open in Google Maps →</a>` : ""}
           </div>
         `;
         iw.setContent(div);
@@ -353,11 +353,29 @@ export default function App() {
 
     const spins = Math.floor(Math.random() * 3) + 5;
     const degrees = spins * 360 + Math.floor(Math.random() * 360);
-    wheelRotationRef.current += degrees;
+
+    // Ensure we start from a clean rotation:0 with no transition,
+    // then force a reflow so the browser commits that state
+    // before we apply the spin transition. This avoids the browser
+    // coalescing updates and skipping the animation.
+    wheelEl.style.transition = "none";
+    wheelEl.style.transform = "rotate(0deg)";
+    wheelRotationRef.current = 0;
+    // eslint-disable-next-line no-unused-expressions
+    wheelEl.offsetWidth;
+
+    wheelRotationRef.current = degrees;
     wheelEl.style.transition = "transform 2.6s cubic-bezier(0.17, 0.67, 0.2, 1)";
-    wheelEl.style.transform = `rotate(${wheelRotationRef.current}deg)`;
+    wheelEl.style.transform = `rotate(${degrees}deg)`;
 
     setTimeout(() => {
+      // Snap wheel back to 0 instantly so the winner text is readable.
+      wheelEl.style.transition = "none";
+      wheelEl.style.transform = "rotate(0deg)";
+      wheelRotationRef.current = 0;
+      // eslint-disable-next-line no-unused-expressions
+      wheelEl.offsetWidth;
+
       setWheelText(chosen.name);
 
       if (mapRef.current && chosen.location) {
@@ -371,9 +389,9 @@ export default function App() {
           path: window.google.maps.SymbolPath.CIRCLE,
           fillColor: isWinner ? GOLD : NAVY_900,
           fillOpacity: 1,
-          strokeWeight: isWinner ? 4 : 3,
+          strokeWeight: isWinner ? 2 : 1.5,
           strokeColor: isWinner ? NAVY_900 : GOLD,
-          scale: isWinner ? 14 : 10,
+          scale: isWinner ? 13 : 9,
         });
         if (isWinner) {
           window.google.maps.event.trigger(marker, "click");
