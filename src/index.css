@@ -553,11 +553,23 @@ a {
   padding: 10px;
   border-radius: var(--r-md);
   cursor: pointer;
-  transition: background 0.18s ease, transform 0.18s ease;
+  opacity: 0.5;
+  transition: background 0.18s ease, opacity 0.18s ease, transform 0.18s ease;
+}
+
+.restaurant-item:not(.selected) .restaurant-photo,
+.restaurant-item:not(.selected) .restaurant-photo-placeholder {
+  filter: grayscale(0.7);
+}
+
+.restaurant-item:not(.selected) .restaurant-name,
+.restaurant-item:not(.selected) .restaurant-meta {
+  color: var(--text-muted);
 }
 
 .restaurant-item:hover {
   background: rgba(30, 58, 107, 0.1);
+  opacity: 0.85;
 }
 
 .restaurant-item:active {
@@ -565,11 +577,7 @@ a {
 }
 
 .restaurant-item.selected {
-  background: rgba(201, 163, 72, 0.16);
-}
-
-.restaurant-item.selected:hover {
-  background: rgba(201, 163, 72, 0.22);
+  opacity: 1;
 }
 
 .restaurant-checkbox {

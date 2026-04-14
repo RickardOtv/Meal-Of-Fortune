@@ -71,6 +71,7 @@ export default function App() {
   const markersRef = useRef([]);
   const wheelRotationRef = useRef(0);
   const isSpinningRef = useRef(false);
+  const selectedIndexesRef = useRef([]);
 
   const [restaurants, setRestaurants] = useState([]);
   const [wheelText, setWheelText] = useState("Spin Me");
@@ -93,6 +94,23 @@ export default function App() {
   useEffect(() => {
     try { localStorage.setItem("mof-filters", JSON.stringify(filters)); } catch { /* ignore */ }
   }, [filters]);
+
+  // Keep ref in sync so marker click handlers read the latest selection,
+  // and recolor markers whenever selection changes.
+  useEffect(() => {
+    selectedIndexesRef.current = selectedIndexes;
+    markersRef.current.forEach((marker, idx) => {
+      const isSelected = selectedIndexes.includes(idx);
+      marker.setIcon({
+        path: window.google?.maps?.SymbolPath?.CIRCLE ?? 0,
+        fillColor: isSelected ? NAVY_900 : "#b0b6c3",
+        fillOpacity: 1,
+        strokeWeight: 1.5,
+        strokeColor: isSelected ? GOLD : "#8a90a0",
+        scale: 9,
+      });
+    });
+  }, [selectedIndexes]);
 
   useEffect(() => {
     if (!toast) return;
@@ -291,7 +309,7 @@ export default function App() {
     markersRef.current = [];
 
     const iw = infoWindowRef.current;
-    items.forEach((r) => {
+    items.forEach((r, idx) => {
       if (!r.location) return;
       const marker = new google.maps.Marker({
         map: mapRef.current,
@@ -307,16 +325,32 @@ export default function App() {
         },
       });
 
-      marker.addListener("click", () => {
+      const buildContent = () => {
+        const isSelected = selectedIndexesRef.current.includes(idx);
         const div = document.createElement("div");
         div.style.cssText = "width:220px;font-family:-apple-system,BlinkMacSystemFont,sans-serif;";
         div.innerHTML = `
           ${r.photoUrl ? `<img src="${r.photoUrl}" alt="${r.name}" style="display:block;width:100%;height:100px;object-fit:cover;border-radius:6px;margin-bottom:10px;" />` : ""}
           <div style="font-weight:700;color:#0b1a33;font-size:14px;margin-bottom:4px;line-height:1.3;">${r.name}</div>
           <div style="color:#4a5568;font-size:11px;margin-bottom:10px;line-height:1.4;">${r.address}</div>
-          ${r.mapsUrl ? `<a href="${r.mapsUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-block;color:#0b1a33;font-weight:600;text-decoration:none;font-size:11px;padding:5px 10px;background:#f0ead9;border-radius:999px;">Open in Google Maps →</a>` : ""}
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <button type="button" data-toggle style="cursor:pointer;border:none;color:#fff;font-weight:600;font-size:11px;padding:6px 12px;border-radius:999px;background:${isSelected ? "#0b1a33" : "#8a90a0"};">
+              ${isSelected ? "Selected" : "Deselected"}
+            </button>
+            ${r.mapsUrl ? `<a href="${r.mapsUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-block;color:#0b1a33;font-weight:600;text-decoration:none;font-size:11px;padding:5px 10px;background:#f0ead9;border-radius:999px;">Open in Maps →</a>` : ""}
+          </div>
         `;
-        iw.setContent(div);
+        div.querySelector("[data-toggle]")?.addEventListener("click", () => {
+          handleCheckboxChange(idx);
+          setTimeout(() => {
+            iw.setContent(buildContent());
+          }, 0);
+        });
+        return div;
+      };
+
+      marker.addListener("click", () => {
+        iw.setContent(buildContent());
         iw.open({ map: mapRef.current, anchor: marker });
       });
 
