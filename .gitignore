@@ -27,3 +27,8 @@ key.jsx
 
 # Claude
 .claude
+
+# Playwright debug artifacts
+.playwright-mcp/
+desktop*.png
+mobile*.png

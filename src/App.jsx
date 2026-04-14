@@ -9,7 +9,12 @@ import FilterModal from "./components/FilterModal";
 
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
-// Converts Google price level to readable symbols
+// Brand colors (keep in sync with index.css)
+const NAVY_900 = "#0b1a33";
+const NAVY_500 = "#1e3a6b";
+const GOLD = "#c9a348";
+const GOLD_LIGHT = "#e4c574";
+
 function priceToSymbols(priceLevel) {
   if (!priceLevel) return "";
   const priceLabels = {
@@ -22,7 +27,6 @@ function priceToSymbols(priceLevel) {
   return priceLabels[priceLevel] || "";
 }
 
-// Load persisted filters from localStorage
 function loadFilters() {
   try {
     const saved = localStorage.getItem("mof-filters");
@@ -32,42 +36,59 @@ function loadFilters() {
     isOpen: true,
     isRestaurant: true,
     isCafe: false,
-    priceLevels: [],      // empty = any price
-    minRating: 0,         // 0 = any rating
-    cuisineType: "",       // "" = no cuisine filter
+    priceLevels: [],
+    minRating: 0,
+    cuisineType: "",
   };
 }
 
-export default function App() {
-  // ===== State and Refs =====
-  const mapRef = useRef(null);         // Google Map instance
-  const infoWindowRef = useRef(null);  // Info window for markers
-  const markersRef = useRef([]);       // Restaurant markers
-  const wheelRotationRef = useRef(0);  // Cumulative wheel rotation
+// Light map style — clean Apple-ish look
+const MAP_STYLE = [
+  { elementType: "geometry", stylers: [{ color: "#f5f5f7" }] },
+  { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
+  { elementType: "labels.text.fill", stylers: [{ color: "#4a5568" }] },
+  { elementType: "labels.text.stroke", stylers: [{ color: "#ffffff" }] },
+  { featureType: "administrative.land_parcel", stylers: [{ visibility: "off" }] },
+  { featureType: "administrative.neighborhood", stylers: [{ visibility: "off" }] },
+  { featureType: "poi", stylers: [{ visibility: "off" }] },
+  { featureType: "poi.park", elementType: "geometry", stylers: [{ color: "#e8eee3" }] },
+  { featureType: "road", elementType: "geometry", stylers: [{ color: "#ffffff" }] },
+  { featureType: "road.arterial", elementType: "geometry", stylers: [{ color: "#ffffff" }] },
+  { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#ffffff" }] },
+  { featureType: "road.highway", elementType: "geometry.stroke", stylers: [{ color: "#e4c574" }] },
+  { featureType: "transit", stylers: [{ visibility: "off" }] },
+  { featureType: "water", elementType: "geometry", stylers: [{ color: "#d5e2f0" }] },
+  { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#1e3a6b" }] },
+];
 
-  const [restaurants, setRestaurants] = useState([]); // List of found restaurants
-  const [wheelText, setWheelText] = useState("🎡 Spin Me"); // Wheel display text
-  const [selectedIndexes, setSelectedIndexes] = useState([]); // Selected restaurants
-  const [isSearching, setIsSearching] = useState(false); // Loading state for search
-  const [hasSearched, setHasSearched] = useState(false); // Whether user has searched at least once
+export default function App() {
+  const mapRef = useRef(null);
+  const infoWindowRef = useRef(null);
+  const markersRef = useRef([]);
+  const wheelRotationRef = useRef(0);
+
+  const [restaurants, setRestaurants] = useState([]);
+  const [wheelText, setWheelText] = useState("Spin Me");
+  const [selectedIndexes, setSelectedIndexes] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
   const [filters, setFilters] = useState(loadFilters);
   const [showHelp, setShowHelp] = useState(false);
   const [showFilterModal, setShowFilterModal] = useState(false);
-  const [toast, setToast] = useState(null); // { message, type: 'info' | 'error' }
+  const [showWheel, setShowWheel] = useState(false);
+  const [toast, setToast] = useState(null);
+  const [promptSearch, setPromptSearch] = useState(true);
 
-  // Count active filters beyond defaults
   const activeFilterCount = [
     (filters.priceLevels?.length || 0) > 0,
     filters.minRating > 0,
     filters.cuisineType !== "",
   ].filter(Boolean).length;
 
-  // Persist filters to localStorage
   useEffect(() => {
     try { localStorage.setItem("mof-filters", JSON.stringify(filters)); } catch { /* ignore */ }
   }, [filters]);
 
-  // Toast auto-dismiss
   useEffect(() => {
     if (!toast) return;
     const timer = setTimeout(() => setToast(null), 4000);
@@ -78,48 +99,70 @@ export default function App() {
     setToast({ message, type });
   }, []);
 
-  // ===== Initialize Google Map on mount =====
   useEffect(() => {
     const loader = new Loader({
       apiKey: GOOGLE_MAPS_API_KEY,
       version: "weekly",
+      libraries: ["places"],
     });
     loader.load().then((google) => {
       initMap(google);
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ===== Map Setup =====
   async function initMap(google) {
     const { Map, InfoWindow } = await google.maps.importLibrary("maps");
 
-    // Setup map and marker at user's location (or fallback)
     const setup = (loc, zoom = 15) => {
       mapRef.current = new Map(document.getElementById("map"), {
         center: loc,
         zoom,
         clickableIcons: false,
+        disableDefaultUI: true,
+        zoomControl: true,
+        zoomControlOptions: {
+          position: google.maps.ControlPosition.RIGHT_BOTTOM,
+        },
+        styles: MAP_STYLE,
+        gestureHandling: "greedy",
       });
 
-      // "You are here" marker with custom gothic styling
       new google.maps.Marker({
         map: mapRef.current,
         position: loc,
         title: "You are here",
         icon: {
           path: google.maps.SymbolPath.CIRCLE,
-          fillColor: "#d4af37",
+          fillColor: GOLD,
           fillOpacity: 1,
           strokeWeight: 3,
-          strokeColor: "#2d1b2e",
+          strokeColor: NAVY_900,
           scale: 8,
         },
       });
 
       infoWindowRef.current = new InfoWindow();
+
+      // Location autocomplete — pans map on place selection
+      const input = document.getElementById("location-search");
+      if (input && google.maps.places?.Autocomplete) {
+        const autocomplete = new google.maps.places.Autocomplete(input, {
+          fields: ["geometry", "name", "formatted_address"],
+        });
+        autocomplete.addListener("place_changed", () => {
+          const place = autocomplete.getPlace();
+          if (place.geometry?.viewport) {
+            mapRef.current.fitBounds(place.geometry.viewport);
+          } else if (place.geometry?.location) {
+            mapRef.current.setCenter(place.geometry.location);
+            mapRef.current.setZoom(15);
+          }
+          setPromptSearch(true);
+        });
+      }
     };
 
-    // Try geolocation, fallback to NYC
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => setup({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
@@ -128,25 +171,18 @@ export default function App() {
           setup({ lat: 40.7128, lng: -74.006 }, 14);
           showToast("Could not detect your location. Showing New York City.", "info");
         },
-        {
-          enableHighAccuracy: true,
-          timeout: 15000,
-          maximumAge: 0
-        }
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
       );
     } else {
-      console.log("Geolocation not supported");
       setup({ lat: 40.7128, lng: -74.006 }, 14);
       showToast("Geolocation not supported. Showing New York City.", "info");
     }
   }
 
-  // ===== Fetch restaurants from Google Places API (Text Search with pagination) =====
   async function fetchRestaurants(bounds, appliedFilters) {
     const sw = bounds.getSouthWest();
     const ne = bounds.getNorthEast();
 
-    // Build text query from filters
     const queryParts = [];
     if (appliedFilters.isRestaurant) queryParts.push("restaurant");
     if (appliedFilters.isCafe) queryParts.push("cafe");
@@ -155,19 +191,17 @@ export default function App() {
     let allPlaces = [];
     let pageToken = null;
 
-    // Fetch up to 3 pages (60 results max)
     do {
       const body = {
         textQuery,
-        // Use locationRestriction (rectangle) for strict bounds - only returns places within visible area
         locationRestriction: {
           rectangle: {
             low: { latitude: sw.lat(), longitude: sw.lng() },
-            high: { latitude: ne.lat(), longitude: ne.lng() }
-          }
+            high: { latitude: ne.lat(), longitude: ne.lng() },
+          },
         },
         ...(appliedFilters.cuisineType && { includedType: appliedFilters.cuisineType }),
-        ...(pageToken && { pageToken })
+        ...(pageToken && { pageToken }),
       };
 
       const resp = await fetch(
@@ -185,7 +219,6 @@ export default function App() {
       );
 
       const data = await resp.json();
-      console.log("API Response:", data);
       if (data.error) {
         console.error("API Error:", data.error);
         showToast("Search failed: " + (data.error.message || "Unknown error"), "error");
@@ -194,13 +227,9 @@ export default function App() {
       allPlaces.push(...(data.places || []));
       pageToken = data.nextPageToken;
 
-      // Small delay required between pagination requests
-      if (pageToken) await new Promise(r => setTimeout(r, 200));
+      if (pageToken) await new Promise((r) => setTimeout(r, 200));
     } while (pageToken);
 
-    console.log(`Total places found: ${allPlaces.length}`);
-
-    // Transform places to app format
     let places = allPlaces.map((place) => ({
       id: place.id,
       name: place.displayName?.text || "Unnamed Restaurant",
@@ -212,55 +241,50 @@ export default function App() {
       rating: place.rating,
       priceLevel: place.priceLevel,
       photoUrl: place.photos?.[0]
-        ? `https://places.googleapis.com/v1/${place.photos[0].name}/media?key=${GOOGLE_MAPS_API_KEY}&maxHeightPx=80&maxWidthPx=80`
+        ? `https://places.googleapis.com/v1/${place.photos[0].name}/media?key=${GOOGLE_MAPS_API_KEY}&maxHeightPx=120&maxWidthPx=120`
         : null,
       mapsUrl: place.googleMapsUri,
       isOpen: place.currentOpeningHours?.openNow === true,
     }));
 
-    // Apply "Open Now" filter if enabled
     if (appliedFilters.isOpen) {
-      places = places.filter(place => place.isOpen);
+      places = places.filter((place) => place.isOpen);
     }
 
-    // Apply price level filter if any selected
     if (appliedFilters.priceLevels && appliedFilters.priceLevels.length > 0) {
-      places = places.filter(place => place.priceLevel && appliedFilters.priceLevels.includes(place.priceLevel));
+      places = places.filter(
+        (place) => place.priceLevel && appliedFilters.priceLevels.includes(place.priceLevel)
+      );
     }
 
-    // Apply minimum rating filter
     if (appliedFilters.minRating > 0) {
-      places = places.filter(place => place.rating && place.rating >= appliedFilters.minRating);
+      places = places.filter((place) => place.rating && place.rating >= appliedFilters.minRating);
     }
 
     return places;
   }
 
-  // ===== Search for restaurants and update map =====
   async function searchRestaurants(google) {
     if (!mapRef.current) return;
     const bounds = mapRef.current.getBounds();
     if (!bounds) return;
 
     setIsSearching(true);
-
-    // Fetch restaurants within visible map bounds
+    setPromptSearch(false);
     const items = await fetchRestaurants(bounds, filters);
     setIsSearching(false);
     setHasSearched(true);
     setRestaurants(items);
 
     if (items.length === 0) {
-      showToast("No restaurants found in this area. Try moving the map or adjusting filters.", "info");
+      showToast("No restaurants found here. Try moving the map or filters.", "info");
     }
-    setWheelText("🎡 Spin Me");
-    setSelectedIndexes(items.map((_, i) => i)); // Select all by default
+    setWheelText("Spin Me");
+    setSelectedIndexes(items.map((_, i) => i));
 
-    // Remove old markers
     markersRef.current.forEach((m) => m.setMap(null));
     markersRef.current = [];
 
-    // Add new markers (all burgundy pointers)
     const iw = infoWindowRef.current;
     items.forEach((r) => {
       if (!r.location) return;
@@ -269,30 +293,24 @@ export default function App() {
         position: r.location,
         title: r.name,
         icon: {
-          path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
-          fillColor: "#6b2d5c",
+          path: google.maps.SymbolPath.CIRCLE,
+          fillColor: NAVY_500,
           fillOpacity: 1,
           strokeWeight: 2,
-          strokeColor: "#2d1b2e",
-          scale: 4,
-        }
+          strokeColor: "#ffffff",
+          scale: 7,
+        },
       });
 
       marker.addListener("click", () => {
         const div = document.createElement("div");
-        div.style.maxWidth = "280px";
-        div.style.padding = "16px";
-        div.style.background = "#f4e4c1";
-        div.style.borderRadius = "12px";
-        div.style.border = "3px solid #d4af37";
-        div.style.position = "relative";
-        div.style.margin = "-12px";
-        div.style.boxShadow = "0 4px 20px rgba(0,0,0,0.3), 0 0 20px rgba(212,175,55,0.3)";
+        div.style.maxWidth = "260px";
+        div.style.padding = "14px 16px";
+        div.style.fontFamily = "-apple-system, BlinkMacSystemFont, sans-serif";
         div.innerHTML = `
-          <span onclick="this.closest('.gm-style-iw-c')?.parentElement?.querySelector('button')?.click()" style="position:absolute; top:10px; right:10px; color:#2d1b2e; font-size:24px; cursor:pointer; line-height:1; opacity:0.5; transition:opacity 0.2s; user-select:none;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='0.5'">×</span>
-          <div style="font-weight:bold; color:#000000; font-size:17px; margin-bottom:8px; font-family:'Cinzel', serif; padding-right:30px;">${r.name}</div>
-          <div style="color:#1a1a1a; font-size:14px; margin-bottom:10px; line-height:1.5;">${r.address}</div>
-          ${r.mapsUrl ? `<a href="${r.mapsUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-block; margin-top:4px; color:#8b6914; font-weight:600; text-decoration:none; border-bottom:2px solid #d4af37; font-family:'Cinzel', serif; font-size:13px;">Open in Google Maps →</a>` : ""}
+          <div style="font-weight:700; color:#0b1a33; font-size:15px; margin-bottom:6px; letter-spacing:-0.01em;">${r.name}</div>
+          <div style="color:#4a5568; font-size:12px; margin-bottom:10px; line-height:1.5;">${r.address}</div>
+          ${r.mapsUrl ? `<a href="${r.mapsUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-block; color:#0b1a33; font-weight:600; text-decoration:none; font-size:12px; padding:6px 12px; background:#f0ead9; border-radius:999px;">Open in Google Maps →</a>` : ""}
         `;
         iw.setContent(div);
         iw.open({ map: mapRef.current, anchor: marker });
@@ -302,10 +320,15 @@ export default function App() {
     });
   }
 
-  // ===== Spin the wheel and highlight winner =====
+  function openWheel() {
+    if (selectedIndexes.length === 0) return;
+    setWheelText("Spin Me");
+    setShowWheel(true);
+  }
+
   function spinWheel() {
     if (selectedIndexes.length === 0) {
-      setWheelText("⚠️ First search and select at least one!");
+      setWheelText("Select at least one");
       return;
     }
     const wheelEl = document.getElementById("wheel");
@@ -319,95 +342,67 @@ export default function App() {
       wheelEl.style.transition = "transform 2s ease-out";
       wheelEl.style.transform = `rotate(${wheelRotationRef.current}deg)`;
       setTimeout(() => {
-        // Reset wheel rotation so winner text is readable (not upside down)
         wheelEl.style.transition = "none";
         wheelRotationRef.current = 0;
         wheelEl.style.transform = "rotate(0deg)";
 
-        setWheelText(`🎉 ${chosen.name}`);
+        setWheelText(chosen.name);
 
-        // Pan map to center on winner
         if (mapRef.current && chosen.location) {
           mapRef.current.panTo(chosen.location);
           mapRef.current.setZoom(16);
         }
 
-        // Set all markers to burgundy, winner to gold with bounce
         markersRef.current.forEach((marker, idx) => {
           const isWinner = idx === chosenIndex;
           marker.setIcon({
-            path: window.google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
-            fillColor: isWinner ? "#d4af37" : "#6b2d5c",
+            path: window.google.maps.SymbolPath.CIRCLE,
+            fillColor: isWinner ? GOLD : NAVY_500,
             fillOpacity: 1,
             strokeWeight: 2,
-            strokeColor: "#2d1b2e",
-            scale: isWinner ? 6 : 4,
+            strokeColor: "#ffffff",
+            scale: isWinner ? 11 : 7,
           });
           if (isWinner) {
-            // Bounce animation: scale up then back
-            setTimeout(() => {
-              marker.setIcon({
-                path: window.google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
-                fillColor: "#d4af37",
-                fillOpacity: 1,
-                strokeWeight: 2,
-                strokeColor: "#2d1b2e",
-                scale: 8,
-              });
-              setTimeout(() => {
-                marker.setIcon({
-                  path: window.google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
-                  fillColor: "#d4af37",
-                  fillOpacity: 1,
-                  strokeWeight: 2,
-                  strokeColor: "#2d1b2e",
-                  scale: 6,
-                });
-              }, 200);
-            }, 100);
-            // Auto-open info window on winner
             window.google.maps.event.trigger(marker, "click");
           }
         });
 
-        // Trigger confetti effect with gothic colors
+        // Close wheel modal after a beat so user sees the winner
+        setTimeout(() => setShowWheel(false), 1800);
+
         const duration = 2000;
         const end = Date.now() + duration;
-
         const frame = () => {
           confetti({
             particleCount: 3,
             angle: 60,
             spread: 60,
             origin: { x: 0 },
-            colors: ['#d4af37', '#b8860b', '#f4d03f', '#6b2d5c', '#4a1c40'],
+            colors: [GOLD, GOLD_LIGHT, "#ffffff", NAVY_500, NAVY_900],
             ticks: 200,
             gravity: 0.8,
             decay: 0.94,
-            startVelocity: 30
+            startVelocity: 30,
           });
           confetti({
             particleCount: 3,
             angle: 120,
             spread: 60,
             origin: { x: 1 },
-            colors: ['#d4af37', '#b8860b', '#f4d03f', '#6b2d5c', '#4a1c40'],
+            colors: [GOLD, GOLD_LIGHT, "#ffffff", NAVY_500, NAVY_900],
             ticks: 200,
             gravity: 0.8,
             decay: 0.94,
-            startVelocity: 30
+            startVelocity: 30,
           });
-
-          if (Date.now() < end) {
-            requestAnimationFrame(frame);
-          }
+          if (Date.now() < end) requestAnimationFrame(frame);
         };
         frame();
       }, 2000);
     }
   }
 
-  // ===== UI Handlers =====
   function focusRestaurant(index, google) {
     const restaurant = restaurants[index];
     if (!restaurant || !mapRef.current) return;
@@ -420,9 +415,7 @@ export default function App() {
 
   function handleCheckboxChange(idx) {
     setSelectedIndexes((prev) =>
-      prev.includes(idx)
-        ? prev.filter((i) => i !== idx)
-        : [...prev, idx]
+      prev.includes(idx) ? prev.filter((i) => i !== idx) : [...prev, idx]
     );
   }
 
@@ -434,12 +427,53 @@ export default function App() {
     setSelectedIndexes([]);
   }
 
-  // ===== Render UI =====
   return (
     <div className="app">
-      <h1>🍽️ Meal of Fortune 🎡</h1>
+      <Map />
 
-      {/* Toast notification */}
+      <div className="top-actions">
+        <button
+          type="button"
+          className="icon-button"
+          onClick={() => setShowHelp(true)}
+          aria-label="Help"
+          title="Help"
+        >
+          ?
+        </button>
+      </div>
+
+      <div className="bottom-controls">
+        <div className="search-row">
+          <button
+            type="button"
+            className="icon-button"
+            onClick={() => setShowFilterModal(true)}
+            aria-label="Filters"
+            title="Filters"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="4" y1="6" x2="20" y2="6" />
+              <line x1="7" y1="12" x2="17" y2="12" />
+              <line x1="10" y1="18" x2="14" y2="18" />
+            </svg>
+            {activeFilterCount > 0 && <span className="pill-badge">{activeFilterCount}</span>}
+          </button>
+          <div className="search-wrapper">
+            <svg className="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="7" />
+              <line x1="21" y1="21" x2="16.5" y2="16.5" />
+            </svg>
+            <input
+              id="location-search"
+              type="text"
+              placeholder="Search a city, address, or place…"
+              autoComplete="off"
+            />
+          </div>
+        </div>
+      </div>
+
       {toast && (
         <div className={`toast toast-${toast.type}`} role="alert" aria-live="polite">
           <span>{toast.message}</span>
@@ -447,48 +481,45 @@ export default function App() {
         </div>
       )}
 
-      <div className="main-layout">
+      <Sidebar
+        restaurants={restaurants}
+        selectedIndexes={selectedIndexes}
+        handleCheckboxChange={handleCheckboxChange}
+        focusRestaurant={focusRestaurant}
+        selectAllRestaurants={selectAllRestaurants}
+        deselectAllRestaurants={deselectAllRestaurants}
+        priceToSymbols={priceToSymbols}
+        isSearching={isSearching}
+        hasSearched={hasSearched}
+        onSearch={() => searchRestaurants(window.google)}
+        onSpin={openWheel}
+      />
+
+      <a
+        href="https://github.com/RickardOtv"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="credit-link"
+      >
+        Made by RickardOtv
+      </a>
+
+      {showWheel && (
         <Wheel
           wheelText={wheelText}
           spinWheel={spinWheel}
-          searchRestaurants={() => searchRestaurants(window.google)}
-          onOpenFilters={() => setShowFilterModal(true)}
-          activeFilterCount={activeFilterCount}
-          isSearching={isSearching}
+          onClose={() => setShowWheel(false)}
         />
-        <Map />
-        <Sidebar
-          restaurants={restaurants}
-          selectedIndexes={selectedIndexes}
-          handleCheckboxChange={handleCheckboxChange}
-          focusRestaurant={focusRestaurant}
-          selectAllRestaurants={selectAllRestaurants}
-          deselectAllRestaurants={deselectAllRestaurants}
-          priceToSymbols={priceToSymbols}
-          isSearching={isSearching}
-          hasSearched={hasSearched}
-        />
-      </div>
-      <div className="footer-links">
-        <a
-          href="https://github.com/RickardOtv"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="github-link"
-        >
-          Made by RickardOtv
-        </a>
-        <button
-          className="help-button"
-          onClick={() => setShowHelp(true)}
-          type="button"
-          aria-label="Help"
-        >
-          ?
-        </button>
-      </div>
+      )}
+
       {showHelp && (
-        <div className="help-modal-overlay" onClick={() => setShowHelp(false)} role="dialog" aria-modal="true" aria-label="How to use">
+        <div
+          className="help-modal-overlay"
+          onClick={() => setShowHelp(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="How to use"
+        >
           <div className="help-modal" onClick={(e) => e.stopPropagation()}>
             <button
               className="help-modal-close"
@@ -498,17 +529,18 @@ export default function App() {
             >
               ×
             </button>
-            <h2>How to Use</h2>
+            <h2>How to use</h2>
             <ol>
-              <li>Navigate the map to your desired location</li>
-              <li>Use filters to select restaurant types (Restaurants, Cafes) and availability (Open Now)</li>
-              <li>Click <strong>Search</strong> to find nearby places</li>
-              <li>Check or uncheck restaurants in the list to include them in the spin</li>
-              <li>Click the wheel to <strong>Spin</strong> and let fortune decide your meal!</li>
+              <li>Move the map to where you want to eat.</li>
+              <li>Tap <strong>Filters</strong> to narrow by cuisine, price, or rating.</li>
+              <li>Tap <strong>Search this area</strong> to find places nearby.</li>
+              <li>Uncheck any you don't want in the list.</li>
+              <li>Tap <strong>Spin the Wheel</strong> and let fortune decide.</li>
             </ol>
           </div>
         </div>
       )}
+
       {showFilterModal && (
         <FilterModal
           filters={filters}

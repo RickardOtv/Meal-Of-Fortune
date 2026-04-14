@@ -1,32 +1,49 @@
-export default function Wheel({
-  wheelText,
-  spinWheel,
-  searchRestaurants,
-  onOpenFilters,
-  activeFilterCount,
-  isSearching
-}) {
+import { useEffect } from "react";
+
+export default function Wheel({ wheelText, spinWheel, onClose }) {
+  useEffect(() => {
+    function handleKey(e) {
+      if (e.key === "Escape") onClose();
+    }
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
+  }, [onClose]);
+
   return (
-    <section className="wheel-section">
-      <div className="wheel-bg">
-        <div id="wheel" onClick={spinWheel} role="button" tabIndex={0} aria-label="Spin the wheel" onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); spinWheel(); } }}>
+    <div
+      className="wheel-modal-overlay"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Spin the wheel"
+    >
+      <div className="wheel-modal" onClick={(e) => e.stopPropagation()}>
+        <button
+          className="wheel-modal-close"
+          onClick={onClose}
+          type="button"
+          aria-label="Close wheel"
+        >
+          ×
+        </button>
+        <div className="wheel-modal-title">Wheel of Fortune</div>
+        <div
+          id="wheel"
+          onClick={spinWheel}
+          role="button"
+          tabIndex={0}
+          aria-label="Spin the wheel"
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              spinWheel();
+            }
+          }}
+        >
           {wheelText}
         </div>
-        <div className="dragbar-controls">
-          <button onClick={searchRestaurants} disabled={isSearching}>
-            {isSearching ? "Searching..." : "Search"}
-          </button>
-          <div className="filter-container">
-            <button
-              className="filter-toggle-button"
-              onClick={onOpenFilters}
-              type="button"
-            >
-              Filters {activeFilterCount > 0 && `(${activeFilterCount})`}
-            </button>
-          </div>
-        </div>
+        <div className="wheel-modal-hint">Tap the wheel to spin</div>
       </div>
-    </section>
+    </div>
   );
 }

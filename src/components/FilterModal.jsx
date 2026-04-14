@@ -101,7 +101,7 @@ export default function FilterModal({ filters, onApply, onClose }) {
       <div className="filter-modal" onClick={(e) => e.stopPropagation()}>
         <button className="filter-modal-close" onClick={onClose} type="button" aria-label="Close filters">×</button>
 
-        <h2 className="filter-modal-title">~ Refine Thy Search ~</h2>
+        <h2 className="filter-modal-title">Filters</h2>
 
         <div className="filter-modal-content">
           {/* Open Now toggle */}
