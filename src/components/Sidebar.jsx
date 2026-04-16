@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
+
+const SWIPE_THRESHOLD = 30;
 
 export default function Sidebar({
   restaurants,
@@ -14,14 +16,73 @@ export default function Sidebar({
   onSpin,
 }) {
   const [expanded, setExpanded] = useState(false);
+  const [dragOffset, setDragOffset] = useState(0);
+  const touchStartY = useRef(null);
+  const isDragging = useRef(false);
+  const handledByTouch = useRef(false);
   const hasResults = restaurants.length > 0;
   const selectedCount = selectedIndexes.length;
 
+  const handleTouchStart = useCallback((e) => {
+    touchStartY.current = e.touches[0].clientY;
+    isDragging.current = false;
+    handledByTouch.current = true;
+    setDragOffset(0);
+  }, []);
+
+  const handleTouchMove = useCallback((e) => {
+    if (touchStartY.current === null) return;
+    const deltaY = e.touches[0].clientY - touchStartY.current;
+    if (Math.abs(deltaY) > 5) {
+      isDragging.current = true;
+    }
+    // When collapsed, only allow drag up (negative); when expanded, allow drag down
+    if (!expanded) {
+      setDragOffset(Math.min(0, deltaY));
+    } else {
+      setDragOffset(Math.max(0, deltaY));
+    }
+  }, [expanded]);
+
+  const handleTouchEnd = useCallback(() => {
+    if (touchStartY.current === null) return;
+
+    if (isDragging.current) {
+      if (!expanded && dragOffset < -SWIPE_THRESHOLD) {
+        setExpanded(true);
+      } else if (expanded && dragOffset > SWIPE_THRESHOLD) {
+        setExpanded(false);
+      }
+    } else {
+      // Tap — toggle
+      setExpanded((v) => !v);
+    }
+
+    touchStartY.current = null;
+    isDragging.current = false;
+    setDragOffset(0);
+  }, [expanded, dragOffset]);
+
+  const handleClick = useCallback(() => {
+    // On touch devices, onTouchEnd already toggled — skip the click
+    if (handledByTouch.current) {
+      handledByTouch.current = false;
+      return;
+    }
+    setExpanded((v) => !v);
+  }, []);
+
   return (
-    <aside className={`restaurants-panel${expanded ? " expanded" : ""}`}>
+    <aside
+      className={`restaurants-panel${expanded ? " expanded" : ""}`}
+      style={dragOffset !== 0 ? { transform: `translateY(${dragOffset}px)` } : undefined}
+    >
       <div
         className="panel-handle"
-        onClick={() => setExpanded((v) => !v)}
+        onClick={handleClick}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
         role="button"
         tabIndex={0}
         aria-label={expanded ? "Collapse list" : "Expand list"}
@@ -32,7 +93,22 @@ export default function Sidebar({
           }
         }}
       >
-        <div className="panel-handle-bar" />
+        <svg
+          className={`panel-handle-chevron${expanded ? " flipped" : ""}`}
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <polyline points="18 15 12 9 6 15" />
+        </svg>
+        <span className="panel-handle-label">
+          {expanded ? "Hide list" : hasResults ? "View restaurants" : "Menu"}
+        </span>
       </div>
 
       <div className="panel-brand">
