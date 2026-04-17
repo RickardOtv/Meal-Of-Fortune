@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback } from "react";
 
+
 export default function Sidebar({
   restaurants,
   selectedIndexes,
@@ -17,49 +18,24 @@ export default function Sidebar({
   const hasResults = restaurants.length > 0;
   const selectedCount = selectedIndexes.length;
 
-  const touchRef = useRef({ startY: 0, dragging: false });
-  const panelRef = useRef(null);
+  const touchStartY = useRef(0);
 
   const onTouchStart = useCallback((e) => {
-    touchRef.current.startY = e.touches[0].clientY;
-    touchRef.current.dragging = true;
-    if (panelRef.current) {
-      panelRef.current.style.transition = "none";
-    }
+    touchStartY.current = e.touches[0].clientY;
   }, []);
 
-  const onTouchMove = useCallback((e) => {
-    if (!touchRef.current.dragging || !panelRef.current) return;
-    const deltaY = e.touches[0].clientY - touchRef.current.startY;
-    if (expanded) {
-      const clamped = Math.max(0, deltaY);
-      panelRef.current.style.transform = `translateY(${clamped}px)`;
-    } else {
-      const clamped = Math.min(0, deltaY);
-      panelRef.current.style.transform = `translateY(${clamped}px)`;
-    }
-  }, [expanded]);
-
   const onTouchEnd = useCallback((e) => {
-    if (!touchRef.current.dragging || !panelRef.current) return;
-    touchRef.current.dragging = false;
-    const deltaY = e.changedTouches[0].clientY - touchRef.current.startY;
-    panelRef.current.style.transition = "";
-    panelRef.current.style.transform = "";
-    if (!expanded && deltaY < -40) setExpanded(true);
-    else if (expanded && deltaY > 40) setExpanded(false);
+    const delta = e.changedTouches[0].clientY - touchStartY.current;
+    if (!expanded && delta < -30) setExpanded(true);
+    else if (expanded && delta > 30) setExpanded(false);
   }, [expanded]);
 
   return (
-    <aside
-      ref={panelRef}
-      className={`restaurants-panel${expanded ? " expanded" : ""}`}
-    >
+    <aside className={`restaurants-panel${expanded ? " expanded" : ""}`}>
       <div
         className="panel-handle"
         onClick={() => setExpanded((v) => !v)}
         onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
         role="button"
         tabIndex={0}
