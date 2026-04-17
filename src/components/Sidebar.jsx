@@ -18,47 +18,24 @@ export default function Sidebar({
   const hasResults = restaurants.length > 0;
   const selectedCount = selectedIndexes.length;
 
-  const panelRef = useRef(null);
-  const dragRef = useRef({ startY: 0, startH: 0 });
+  const touchStartY = useRef(0);
 
   const onTouchStart = useCallback((e) => {
-    const panel = panelRef.current;
-    if (!panel) return;
-    dragRef.current.startY = e.touches[0].clientY;
-    dragRef.current.startH = panel.offsetHeight;
-    panel.style.transition = "none";
+    touchStartY.current = e.touches[0].clientY;
   }, []);
 
-  const onTouchMove = useCallback((e) => {
-    const panel = panelRef.current;
-    if (!panel) return;
-    const delta = dragRef.current.startY - e.touches[0].clientY;
-    const maxH = window.innerHeight * 0.62;
-    const newH = Math.max(120, Math.min(maxH, dragRef.current.startH + delta));
-    panel.style.height = `${newH}px`;
-  }, []);
-
-  const onTouchEnd = useCallback(() => {
-    const panel = panelRef.current;
-    if (!panel) return;
-    const currentH = panel.offsetHeight;
-    const maxH = window.innerHeight * 0.62;
-    const threshold = (maxH + 120) / 2;
-    panel.style.transition = "";
-    panel.style.height = "";
-    setExpanded(currentH > threshold);
-  }, []);
+  const onTouchEnd = useCallback((e) => {
+    const delta = e.changedTouches[0].clientY - touchStartY.current;
+    if (!expanded && delta < -30) setExpanded(true);
+    else if (expanded && delta > 30) setExpanded(false);
+  }, [expanded]);
 
   return (
-    <aside
-      ref={panelRef}
-      className={`restaurants-panel${expanded ? " expanded" : ""}`}
-    >
+    <aside className={`restaurants-panel${expanded ? " expanded" : ""}`}>
       <div
         className="panel-handle"
         onClick={() => setExpanded((v) => !v)}
         onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
         role="button"
         tabIndex={0}
