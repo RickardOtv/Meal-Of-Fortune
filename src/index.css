@@ -1369,22 +1369,13 @@ a {
     right: 0;
     bottom: 0;
     width: 100%;
-    max-height: 62vh;
+    height: 260px;
     border-radius: var(--r-xl) var(--r-xl) 0 0;
-    transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  .restaurants-panel:not(.expanded) {
-    max-height: none;
-  }
-
-  .restaurants-panel:not(.expanded) .panel-body {
-    display: none;
-  }
-
-  .restaurants-panel:not(.expanded) .panel-header {
-    border-bottom: none;
-    padding-bottom: 10px;
+  .restaurants-panel.expanded {
+    height: calc(100vh - 80px);
   }
 
   .panel-handle {

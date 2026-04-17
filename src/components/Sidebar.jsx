@@ -18,24 +18,45 @@ export default function Sidebar({
   const hasResults = restaurants.length > 0;
   const selectedCount = selectedIndexes.length;
 
-  const touchStartY = useRef(0);
+  const panelRef = useRef(null);
+  const dragRef = useRef({ startY: 0, startH: 0 });
+  const minH = 260;
 
   const onTouchStart = useCallback((e) => {
-    touchStartY.current = e.touches[0].clientY;
+    if (!panelRef.current) return;
+    dragRef.current.startY = e.touches[0].clientY;
+    dragRef.current.startH = panelRef.current.offsetHeight;
+    panelRef.current.style.transition = "none";
   }, []);
 
-  const onTouchEnd = useCallback((e) => {
-    const delta = e.changedTouches[0].clientY - touchStartY.current;
-    if (!expanded && delta < -30) setExpanded(true);
-    else if (expanded && delta > 30) setExpanded(false);
-  }, [expanded]);
+  const onTouchMove = useCallback((e) => {
+    if (!panelRef.current) return;
+    const delta = dragRef.current.startY - e.touches[0].clientY;
+    const maxH = window.innerHeight - 80;
+    const h = Math.max(minH, Math.min(maxH, dragRef.current.startH + delta));
+    panelRef.current.style.height = `${h}px`;
+  }, []);
+
+  const onTouchEnd = useCallback(() => {
+    if (!panelRef.current) return;
+    const h = panelRef.current.offsetHeight;
+    const maxH = window.innerHeight - 80;
+    const mid = (minH + maxH) / 2;
+    panelRef.current.style.transition = "";
+    panelRef.current.style.height = "";
+    setExpanded(h > mid);
+  }, []);
 
   return (
-    <aside className={`restaurants-panel${expanded ? " expanded" : ""}`}>
+    <aside
+      ref={panelRef}
+      className={`restaurants-panel${expanded ? " expanded" : ""}`}
+    >
       <div
         className="panel-handle"
         onClick={() => setExpanded((v) => !v)}
         onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
         role="button"
         tabIndex={0}
