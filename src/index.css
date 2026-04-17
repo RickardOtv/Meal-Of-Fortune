@@ -1390,15 +1390,16 @@ a {
   .panel-handle {
     display: flex;
     justify-content: center;
-    padding: 8px 0 0;
+    padding: 12px 0 4px;
     cursor: pointer;
+    touch-action: none;
   }
 
   .panel-handle-bar {
     width: 40px;
     height: 5px;
     border-radius: var(--r-pill);
-    background: rgba(15, 23, 42, 0.2);
+    background: rgba(15, 23, 42, 0.25);
   }
 
   .panel-header {
