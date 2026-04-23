@@ -1,4 +1,4 @@
-# 🍽️ Meal of Fortune 🎡
+# Meal of Fortune 🍽️
 
 Turn indecision into adventure! Meal of Fortune gamifies the "where should we eat?" question by letting you spin a wheel to randomly select from nearby restaurants. Features live maps, customizable filters, and real-time restaurant data. Let fortune decide your next meal!
 
