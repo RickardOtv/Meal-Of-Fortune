@@ -1316,7 +1316,7 @@ a {
 /* ===== Mobile ===== */
 @media (max-width: 768px) {
   .top-actions {
-    top: 12px;
+    top: calc(12px + env(safe-area-inset-top));
     right: 12px;
     gap: 8px;
   }
@@ -1341,7 +1341,7 @@ a {
   }
 
   .bottom-controls {
-    top: 12px;
+    top: calc(12px + env(safe-area-inset-top));
     bottom: auto;
     gap: 8px;
     width: calc(100% - 80px);
@@ -1375,7 +1375,7 @@ a {
   }
 
   .restaurants-panel.expanded {
-    height: calc(100vh - 80px);
+    height: calc(100vh - 80px - env(safe-area-inset-top, 0px));
   }
 
   .panel-handle {

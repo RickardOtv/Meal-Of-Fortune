@@ -32,7 +32,7 @@ export default function Sidebar({
   const onTouchMove = useCallback((e) => {
     if (!panelRef.current) return;
     const delta = dragRef.current.startY - e.touches[0].clientY;
-    const maxH = window.innerHeight - 80;
+    const maxH = window.innerHeight - 120;
     const h = Math.max(minH, Math.min(maxH, dragRef.current.startH + delta));
     panelRef.current.style.height = `${h}px`;
   }, []);
@@ -40,7 +40,7 @@ export default function Sidebar({
   const onTouchEnd = useCallback(() => {
     if (!panelRef.current) return;
     const h = panelRef.current.offsetHeight;
-    const maxH = window.innerHeight - 80;
+    const maxH = window.innerHeight - 120;
     const mid = (minH + maxH) / 2;
     panelRef.current.style.transition = "";
     panelRef.current.style.height = "";
