@@ -1378,6 +1378,20 @@ a {
     height: calc(100vh - 80px - env(safe-area-inset-top, 0px));
   }
 
+  .restaurants-panel.pre-search {
+    height: auto;
+  }
+
+  .restaurants-panel.pre-search .panel-brand,
+  .restaurants-panel.pre-search .panel-header,
+  .restaurants-panel.pre-search .panel-body {
+    display: none;
+  }
+
+  .restaurants-panel.pre-search .panel-footer {
+    border-top: none;
+  }
+
   .panel-handle {
     display: flex;
     justify-content: center;

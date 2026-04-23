@@ -50,7 +50,7 @@ export default function Sidebar({
   return (
     <aside
       ref={panelRef}
-      className={`restaurants-panel${expanded ? " expanded" : ""}`}
+      className={`restaurants-panel${expanded ? " expanded" : ""}${!hasSearched ? " pre-search" : ""}`}
     >
       <div
         className="panel-handle"
