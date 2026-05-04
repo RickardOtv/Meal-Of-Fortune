@@ -1,7 +1,7 @@
 /* ===== Design Tokens ===== */
 :root {
   /* Surfaces */
-  --bg: #f5f5f7;
+  --bg: #eef0f4;
   --surface: rgba(240, 243, 249, 0.92);
   --surface-strong: rgba(245, 247, 252, 0.98);
   --surface-solid: #f4f6fa;
@@ -48,6 +48,7 @@
 html, body {
   height: 100%;
   overscroll-behavior: none;
+  background: var(--bg);
 }
 
 body {
@@ -76,17 +77,22 @@ a {
   position: fixed;
   inset: 0;
   overflow: hidden;
+  background: var(--bg);
 }
 
 /* ===== Map Backdrop ===== */
+/* Map fills the full viewport including under the iOS notch (viewport-fit=cover
+   + black-translucent status bar make the page extend edge-to-edge). */
 .map-backdrop {
   position: absolute;
   inset: 0;
+  background: var(--bg);
 }
 
 #map {
   width: 100%;
   height: 100%;
+  background: var(--bg);
 }
 
 /* ===== Top Bar ===== */
@@ -1375,7 +1381,7 @@ a {
   }
 
   .restaurants-panel.expanded {
-    height: calc(100vh - 80px - env(safe-area-inset-top, 0px));
+    height: calc(100vh - 130px - env(safe-area-inset-top, 0px));
   }
 
   .restaurants-panel.pre-search {
