@@ -29,7 +29,7 @@ This is a React 19 + Vite single-page application for randomly selecting restaur
 All state lives in [App.jsx](src/App.jsx) and flows down to components via props:
 - `restaurants` - Array of restaurant data from Google Places API
 - `selectedIndexes` - Which restaurants are included in the wheel spin
-- `filters` - Search filters (isOpen, isRestaurant, isCafe)
+- `filters` - Search filters (isOpen, isRestaurant, isCafe, priceLevels[], minRating, cuisineTypes[]); defaults live in [filters.js](src/filters.js) and the object is persisted to localStorage
 - `mapRef`, `markersRef`, `infoWindowRef` - Google Maps instances stored in refs
 
 ### Component Structure
@@ -38,7 +38,7 @@ All state lives in [App.jsx](src/App.jsx) and flows down to components via props
 - **Wheel.jsx** - Fortune wheel modal: pointer, segmented wheel, cream hub that shows the result
 - **Map.jsx** - Simple container for the Google Maps div (actual map logic is in App)
 - **Sidebar.jsx** - Restaurant list with checkboxes for selection, search/spin footer, mobile bottom-sheet drag
-- **FilterModal.jsx** - Filter dialog (open now, establishment, price, cuisine, rating)
+- **FilterModal.jsx** - Filter dialog: open-now switch, place type, price, rating, searchable multi-select cuisine list (popular subset by default, expandable); becomes a bottom sheet on mobile
 - **icons.jsx** - Inline SVG icon components; use these instead of emoji or ad-hoc SVGs
 
 ### Google Maps Integration
@@ -47,13 +47,13 @@ The app uses `@googlemaps/js-api-loader` to load the Maps SDK. The map is initia
 
 ### Places API
 
-Uses the new Places API (`places.googleapis.com/v1/places:searchText`) with `locationRestriction` to search within the visible map bounds. Supports pagination via `nextPageToken`.
+Uses the new Places API (`places.googleapis.com/v1/places:searchText`) with `locationRestriction` to search within the visible map bounds. Supports pagination via `nextPageToken`. The API accepts one `includedType` per request, so multiple selected cuisines run as parallel searches that are merged and de-duplicated by place id.
 
 ## Styling
 
 All styles are in [index.css](src/index.css). Design tokens live in `:root`; use them instead of raw hex values.
 
-- **Palette**: bordeaux primary (`--wine-700` #63001e, darker `--wine-900`/`--wine-950` for text), beige/cream surfaces (`--beige-100` #f6efe6 ground, `--cream` #fbf8f3), muted antique gold accent (`--gold` #b8955a) only for ratings, badges, the wheel rim and the user-location dot. No cool greys.
+- **Palette**: bordeaux primary (`--wine-700` #63001e, darker `--wine-900`/`--wine-950` for text), beige/cream surfaces (`--beige-100` #f5ecdf ground, also the dialog paper via `--sheet`; `--cream` #fbf8f3 for raised elements), muted antique gold accent (`--gold` #b8955a) only for ratings, badges, the wheel rim and the user-location dot. No cool greys.
 - **Type**: Inter (`--font-ui`) for UI text, Fraunces (`--font-display`) for the brand name, panel/modal titles and wheel text.
 - **Surfaces**: translucent beige glass (`--surface` + `--blur`), wine-tinted borders and shadows, large radii (`--r-md` to `--r-xl`).
 - **Map**: warm parchment style in `MAP_STYLE` in App.jsx. Marker and confetti colors are constants at the top of App.jsx and must stay in sync with the CSS tokens.

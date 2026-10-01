@@ -6,7 +6,8 @@ import Wheel from "./components/Wheel";
 import Map from "./components/Map";
 import Sidebar from "./components/Sidebar";
 import FilterModal from "./components/FilterModal";
-import { FilterIcon, SearchIcon } from "./components/icons";
+import { FilterIcon, SearchIcon, PlusIcon, MinusIcon } from "./components/icons";
+import { DEFAULT_FILTERS } from "./filters";
 
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
@@ -35,17 +36,15 @@ function priceToSymbols(priceLevel) {
 
 function loadFilters() {
   try {
-    const saved = localStorage.getItem("mof-filters");
-    if (saved) return JSON.parse(saved);
+    const saved = JSON.parse(localStorage.getItem("mof-filters"));
+    if (saved) {
+      // Older saves stored a single cuisineType string
+      const { cuisineType, ...rest } = saved;
+      const migrated = cuisineType ? { cuisineTypes: [cuisineType] } : {};
+      return { ...DEFAULT_FILTERS, ...rest, ...migrated };
+    }
   } catch { /* ignore */ }
-  return {
-    isOpen: true,
-    isRestaurant: true,
-    isCafe: false,
-    priceLevels: [],
-    minRating: 0,
-    cuisineType: "",
-  };
+  return { ...DEFAULT_FILTERS };
 }
 
 // Warm parchment map — beige land, cream roads, muted sage parks, dusty water
@@ -53,7 +52,7 @@ const MAP_STYLE = [
   { elementType: "geometry", stylers: [{ color: "#efe6d8" }] },
   { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
   { elementType: "labels.text.fill", stylers: [{ color: "#6e4e53" }] },
-  { elementType: "labels.text.stroke", stylers: [{ color: "#f6efe6" }] },
+  { elementType: "labels.text.stroke", stylers: [{ color: "#f5ecdf" }] },
   { featureType: "administrative", elementType: "geometry.stroke", stylers: [{ color: "#d9c6ac" }] },
   { featureType: "administrative.land_parcel", stylers: [{ visibility: "off" }] },
   { featureType: "administrative.neighborhood", stylers: [{ visibility: "off" }] },
@@ -96,7 +95,7 @@ export default function App() {
   const activeFilterCount = [
     (filters.priceLevels?.length || 0) > 0,
     filters.minRating > 0,
-    filters.cuisineType !== "",
+    (filters.cuisineTypes?.length || 0) > 0,
   ].filter(Boolean).length;
 
   useEffect(() => {
@@ -151,10 +150,6 @@ export default function App() {
         zoom,
         clickableIcons: false,
         disableDefaultUI: true,
-        zoomControl: true,
-        zoomControlOptions: {
-          position: google.maps.ControlPosition.RIGHT_BOTTOM,
-        },
         styles: MAP_STYLE,
         gestureHandling: "greedy",
       });
@@ -210,28 +205,16 @@ export default function App() {
     }
   }
 
-  async function fetchRestaurants(bounds, appliedFilters) {
-    const sw = bounds.getSouthWest();
-    const ne = bounds.getNorthEast();
-
-    const queryParts = [];
-    if (appliedFilters.isRestaurant) queryParts.push("restaurant");
-    if (appliedFilters.isCafe) queryParts.push("cafe");
-    const textQuery = queryParts.length > 0 ? queryParts.join(" ") : "restaurant";
-
-    let allPlaces = [];
+  // One paginated Text Search request; includedType narrows it to a cuisine.
+  async function fetchPlaces(rectangle, textQuery, includedType) {
+    const places = [];
     let pageToken = null;
 
     do {
       const body = {
         textQuery,
-        locationRestriction: {
-          rectangle: {
-            low: { latitude: sw.lat(), longitude: sw.lng() },
-            high: { latitude: ne.lat(), longitude: ne.lng() },
-          },
-        },
-        ...(appliedFilters.cuisineType && { includedType: appliedFilters.cuisineType }),
+        locationRestriction: { rectangle },
+        ...(includedType && { includedType }),
         ...(pageToken && { pageToken }),
       };
 
@@ -255,11 +238,40 @@ export default function App() {
         showToast("Search failed: " + (data.error.message || "Unknown error"), "error");
         break;
       }
-      allPlaces.push(...(data.places || []));
+      places.push(...(data.places || []));
       pageToken = data.nextPageToken;
 
       if (pageToken) await new Promise((r) => setTimeout(r, 200));
     } while (pageToken);
+
+    return places;
+  }
+
+  async function fetchRestaurants(bounds, appliedFilters) {
+    const sw = bounds.getSouthWest();
+    const ne = bounds.getNorthEast();
+    const rectangle = {
+      low: { latitude: sw.lat(), longitude: sw.lng() },
+      high: { latitude: ne.lat(), longitude: ne.lng() },
+    };
+
+    const queryParts = [];
+    if (appliedFilters.isRestaurant) queryParts.push("restaurant");
+    if (appliedFilters.isCafe) queryParts.push("cafe");
+    const textQuery = queryParts.length > 0 ? queryParts.join(" ") : "restaurant";
+
+    // The API takes a single includedType, so run one search per selected
+    // cuisine in parallel and merge the results, de-duplicated by place id.
+    const cuisineTypes = appliedFilters.cuisineTypes?.length ? appliedFilters.cuisineTypes : [null];
+    const results = await Promise.all(
+      cuisineTypes.map((type) => fetchPlaces(rectangle, textQuery, type))
+    );
+    const seen = new Set();
+    const allPlaces = results.flat().filter((place) => {
+      if (seen.has(place.id)) return false;
+      seen.add(place.id);
+      return true;
+    });
 
     let places = allPlaces.map((place) => ({
       id: place.id,
@@ -470,6 +482,12 @@ export default function App() {
     }, 2600);
   }
 
+  function zoomBy(delta) {
+    const map = mapRef.current;
+    if (!map) return;
+    map.setZoom(map.getZoom() + delta);
+  }
+
   function focusRestaurant(index, google) {
     const restaurant = restaurants[index];
     if (!restaurant || !mapRef.current) return;
@@ -507,6 +525,15 @@ export default function App() {
           title="Help"
         >
           ?
+        </button>
+      </div>
+
+      <div className="map-zoom" role="group" aria-label="Map zoom">
+        <button type="button" className="map-zoom-btn" onClick={() => zoomBy(1)} aria-label="Zoom in">
+          <PlusIcon />
+        </button>
+        <button type="button" className="map-zoom-btn" onClick={() => zoomBy(-1)} aria-label="Zoom out">
+          <MinusIcon />
         </button>
       </div>
 

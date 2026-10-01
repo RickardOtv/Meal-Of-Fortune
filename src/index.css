@@ -2,9 +2,9 @@
 :root {
   /* Beige / cream */
   --cream: #fbf8f3;
-  --beige-100: #f6efe6;
-  --beige-200: #efe4d6;
-  --beige-300: #e3d3bf;
+  --beige-100: #f5ecdf;
+  --beige-200: #ede2d0;
+  --beige-300: #e1d1b9;
   --sand: #cdb79b;
 
   /* Bordeaux (primary) */
@@ -22,7 +22,7 @@
 
   /* Surfaces */
   --bg: var(--beige-100);
-  --surface: rgba(246, 239, 230, 0.86);
+  --surface: rgba(245, 236, 223, 0.88);
   --surface-strong: rgba(251, 248, 243, 0.96);
   --surface-solid: var(--cream);
   --border: rgba(99, 0, 30, 0.1);
@@ -31,10 +31,16 @@
   --fill-hover: rgba(99, 0, 30, 0.09);
   --highlight: inset 0 1px 0 rgba(255, 255, 255, 0.55);
 
+  /* Dialog sheets share the panel beige; light frosted scrim, brown-tinted hairlines */
+  --sheet: var(--beige-100);
+  --sheet-line: rgba(96, 72, 48, 0.14);
+  --sheet-line-strong: rgba(96, 72, 48, 0.24);
+  --scrim: rgba(255, 253, 250, 0.35);
+
   /* Text */
   --text-primary: var(--wine-950);
-  --text-secondary: #6e4e53;
-  --text-muted: #937a7e;
+  --text-secondary: #5f4046;
+  --text-muted: #8a6f74;
   --text-on-wine: var(--cream);
 
   /* Effects */
@@ -139,14 +145,55 @@ a {
   z-index: 20;
 }
 
+/* Custom map zoom. Google's own control is disabled in App.jsx so the
+   buttons can match the palette. Hidden on phones, where pinch-zoom is natural. */
+.map-zoom {
+  position: absolute;
+  right: var(--gutter);
+  bottom: 28px;
+  display: flex;
+  flex-direction: column;
+  background: var(--wine-700);
+  border-radius: var(--r-pill);
+  box-shadow: var(--shadow-wine);
+  overflow: hidden;
+  z-index: 20;
+}
+
+.map-zoom-btn {
+  width: 48px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--cream);
+  transition: background 0.15s ease;
+}
+
+.map-zoom-btn:hover {
+  background: var(--wine-600);
+}
+
+.map-zoom-btn:focus-visible {
+  outline-offset: -3px;
+}
+
+.map-zoom-btn + .map-zoom-btn {
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+}
+
 /* Bottom floating controls (filter + search input).
-   Anchored to the map area right of the restaurants panel so they can never
-   overlap it; the right offset leaves room for the map zoom control. */
+   Centered on the viewport whenever that fits; the bar narrows before it would
+   touch the restaurants panel, and only at narrow widths slides right of it.
+   --edge clears the panel, 76px on the right clears the zoom buttons. */
 .bottom-controls {
+  --edge: calc(var(--panel-w) + var(--gutter) * 2);
+  --max-w: calc(100% - var(--edge) - 76px);
+  --w: clamp(min(420px, var(--max-w)), calc(100% - var(--edge) * 2), 720px);
   position: absolute;
   bottom: 28px;
-  left: calc(var(--panel-w) + var(--gutter) * 2);
-  right: 76px;
+  left: max(var(--edge), calc(50% - var(--w) / 2));
+  width: var(--w);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -358,7 +405,7 @@ a {
 .spin-cta-icon {
   border-radius: 50%;
   background: conic-gradient(
-    from -45deg,
+    from 0deg,
     var(--wine-700) 0deg 90deg,
     var(--cream) 90deg 180deg,
     var(--wine-900) 180deg 270deg,
@@ -1055,9 +1102,9 @@ a {
 .filter-modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(42, 13, 16, 0.5);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: var(--scrim);
+  backdrop-filter: blur(14px) saturate(90%);
+  -webkit-backdrop-filter: blur(14px) saturate(90%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1067,8 +1114,8 @@ a {
 }
 
 .filter-modal {
-  background: var(--cream);
-  border: 1px solid var(--border);
+  background: var(--sheet);
+  border: 1px solid var(--sheet-line);
   border-radius: var(--r-xl);
   box-shadow: var(--shadow-lg), var(--highlight);
   width: 100%;
@@ -1081,6 +1128,11 @@ a {
   overflow: hidden;
 }
 
+/* Drag-handle cue, only shown when the modal becomes a bottom sheet on mobile */
+.sheet-handle {
+  display: none;
+}
+
 .filter-modal-close {
   position: absolute;
   top: 16px;
@@ -1088,22 +1140,23 @@ a {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: var(--fill);
+  background: var(--cream);
+  border: 1px solid var(--sheet-line-strong);
   color: var(--wine-900);
   font-size: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1;
-  transition: background 0.15s ease;
+  transition: border-color 0.15s ease;
 }
 
 .filter-modal-close:hover {
-  background: var(--fill-hover);
+  border-color: var(--wine-500);
 }
 
 .filter-modal-title {
-  padding: 22px 26px 8px;
+  padding: 22px 26px 6px;
   font-family: var(--font-display);
   font-size: 24px;
   font-weight: 600;
@@ -1112,34 +1165,57 @@ a {
 }
 
 .filter-modal-content {
-  padding: 8px 26px 20px;
+  padding: 4px 26px 20px;
   overflow-y: auto;
   flex: 1;
 }
 
-.filter-modal-section {
-  padding: 14px 0;
+.filter-section {
+  padding: 16px 0;
 }
 
-.filter-modal-section-label {
+.filter-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 28px;
+  margin-bottom: 10px;
+}
+
+.filter-section-label {
+  display: inline-flex;
+  align-items: center;
   font-size: 11px;
   font-weight: 700;
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  margin-bottom: 10px;
+}
+
+.filter-section-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  margin-left: 8px;
+  border-radius: var(--r-pill);
+  background: var(--wine-700);
+  color: var(--cream);
+  font-size: 11px;
+  letter-spacing: 0;
 }
 
 .filter-modal-divider {
   height: 1px;
-  background: var(--border);
-  margin: 4px 0;
+  background: var(--sheet-line);
 }
 
 .filter-modal-row {
   display: flex;
   gap: 24px;
-  padding: 14px 0;
 }
 
 .filter-modal-col {
@@ -1147,33 +1223,49 @@ a {
   min-width: 0;
 }
 
-.filter-toggle-row {
+/* Place type has two fixed chips; give price the remaining width so its
+   five chips stay on one line. */
+.filter-modal-col:first-child {
+  flex: 0 0 auto;
+}
+
+/* Open now switch */
+.filter-switch-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
+  padding: 16px 0;
 }
 
-.filter-toggle-label {
+.filter-switch-label {
   font-size: 15px;
   font-weight: 600;
   color: var(--wine-950);
 }
 
-.filter-toggle-switch {
+.filter-switch-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.filter-switch {
+  position: relative;
+  flex-shrink: 0;
   width: 44px;
   height: 26px;
-  background: rgba(99, 0, 30, 0.14);
+  padding: 0;
+  background: rgba(99, 0, 30, 0.18);
   border-radius: var(--r-pill);
-  position: relative;
-  cursor: pointer;
   transition: background 0.2s ease;
 }
 
-.filter-toggle-switch.active {
+.filter-switch.active {
   background: var(--wine-700);
 }
 
-.filter-toggle-knob {
+.filter-switch-knob {
   position: absolute;
   top: 2px;
   left: 2px;
@@ -1185,10 +1277,11 @@ a {
   transition: transform 0.2s ease;
 }
 
-.filter-toggle-switch.active .filter-toggle-knob {
+.filter-switch.active .filter-switch-knob {
   transform: translateX(18px);
 }
 
+/* Chips */
 .filter-chip-group {
   display: flex;
   flex-wrap: wrap;
@@ -1198,16 +1291,17 @@ a {
 .filter-chip {
   padding: 8px 14px;
   border-radius: var(--r-pill);
-  background: var(--fill);
-  border: 1px solid transparent;
+  background: var(--cream);
+  border: 1px solid var(--sheet-line-strong);
   color: var(--wine-900);
   font-size: 13px;
   font-weight: 600;
-  transition: all 0.15s ease;
+  box-shadow: 0 1px 2px rgba(60, 40, 20, 0.06);
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
 .filter-chip:hover {
-  background: var(--fill-hover);
+  border-color: var(--wine-500);
 }
 
 .filter-chip.active {
@@ -1216,23 +1310,89 @@ a {
   border-color: var(--wine-700);
 }
 
-.cuisine-grid {
-  max-height: 180px;
-  overflow-y: auto;
-  padding: 4px;
+/* "All N cuisines" / "Show fewer" toggle */
+.filter-chip.ghost {
+  background: transparent;
+  border: 1px dashed var(--sheet-line-strong);
+  color: var(--text-secondary);
+  box-shadow: none;
 }
 
+.filter-chip.ghost:hover {
+  background: var(--cream);
+  border-color: var(--wine-500);
+  color: var(--wine-900);
+}
+
+/* Cuisine search */
+.filter-search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  max-width: 220px;
+  height: 34px;
+  padding: 0 8px 0 12px;
+  background: var(--cream);
+  border: 1px solid var(--sheet-line-strong);
+  border-radius: var(--r-pill);
+  color: var(--text-muted);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.filter-search:focus-within {
+  border-color: var(--wine-500);
+  box-shadow: var(--focus-ring);
+}
+
+.filter-search input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  color: var(--wine-950);
+}
+
+.filter-search input::placeholder {
+  color: var(--text-muted);
+}
+
+.filter-search-clear {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border-radius: 50%;
+  background: rgba(99, 0, 30, 0.1);
+  color: var(--wine-900);
+  font-size: 14px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.filter-empty {
+  padding: 8px 0 2px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* Footer */
 .filter-modal-footer {
   display: flex;
+  align-items: center;
   gap: 10px;
-  padding: 16px 26px 22px;
-  border-top: 1px solid var(--border);
-  background: var(--cream);
+  padding: 14px 26px 20px;
+  border-top: 1px solid var(--sheet-line);
+  background: var(--sheet);
 }
 
 .filter-reset-btn,
 .filter-apply-btn {
-  flex: 1;
   padding: 13px 20px;
   border-radius: var(--r-md);
   font-size: 14px;
@@ -1241,15 +1401,23 @@ a {
 }
 
 .filter-reset-btn {
-  background: var(--fill);
+  flex: 0 0 auto;
+  background: var(--cream);
+  border: 1px solid var(--sheet-line-strong);
   color: var(--wine-900);
 }
 
-.filter-reset-btn:hover {
-  background: var(--fill-hover);
+.filter-reset-btn:hover:not(:disabled) {
+  border-color: var(--wine-500);
+}
+
+.filter-reset-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .filter-apply-btn {
+  flex: 1;
   background: var(--wine-700);
   color: var(--text-on-wine);
   box-shadow: var(--shadow-wine);
@@ -1259,13 +1427,18 @@ a {
   background: var(--wine-600);
 }
 
+@keyframes sheetUp {
+  from { transform: translateY(24px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
 /* ===== Help Modal ===== */
 .help-modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(42, 13, 16, 0.5);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: var(--scrim);
+  backdrop-filter: blur(14px) saturate(90%);
+  -webkit-backdrop-filter: blur(14px) saturate(90%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1275,8 +1448,8 @@ a {
 }
 
 .help-modal {
-  background: var(--cream);
-  border: 1px solid var(--border);
+  background: var(--sheet);
+  border: 1px solid var(--sheet-line);
   border-radius: var(--r-xl);
   padding: 32px;
   max-width: 440px;
@@ -1322,17 +1495,18 @@ a {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: var(--fill);
+  background: var(--cream);
+  border: 1px solid var(--sheet-line-strong);
   color: var(--wine-900);
   font-size: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.15s ease;
+  transition: border-color 0.15s ease;
 }
 
 .help-modal-close:hover {
-  background: var(--fill-hover);
+  border-color: var(--wine-500);
 }
 
 /* ===== Mobile ===== */
@@ -1357,11 +1531,14 @@ a {
     font-size: 14px;
   }
 
+  .map-zoom {
+    display: none;
+  }
+
   .bottom-controls {
     top: calc(12px + env(safe-area-inset-top));
     bottom: auto;
     left: 12px;
-    right: auto;
     width: calc(100% - 80px);
     gap: 8px;
   }
@@ -1442,13 +1619,52 @@ a {
     padding: 16px;
   }
 
+  /* Filters become a bottom sheet on phones */
+  .filter-modal-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
   .filter-modal {
-    max-height: 92vh;
+    max-height: 90vh;
+    border-radius: var(--r-xl) var(--r-xl) 0 0;
+    border-bottom: none;
+    animation: sheetUp 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .sheet-handle {
+    display: block;
+    width: 40px;
+    height: 5px;
+    margin: 10px auto 0;
+    border-radius: var(--r-pill);
+    background: rgba(99, 0, 30, 0.2);
+  }
+
+  .filter-modal-title {
+    padding-top: 12px;
+  }
+
+  .filter-modal-content {
+    padding-left: 20px;
+    padding-right: 20px;
   }
 
   .filter-modal-row {
     flex-direction: column;
-    gap: 12px;
+    gap: 0;
+  }
+
+  .filter-search {
+    max-width: 180px;
+  }
+
+  .filter-chip {
+    padding: 8px 12px;
+  }
+
+  .filter-modal-footer {
+    padding: 12px 20px calc(16px + env(safe-area-inset-bottom, 0px));
   }
 }
 

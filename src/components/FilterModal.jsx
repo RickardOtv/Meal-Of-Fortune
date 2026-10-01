@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
+import { SearchIcon } from "./icons";
+import { DEFAULT_FILTERS } from "../filters";
 
 const CUISINE_TYPES = [
-  { value: "", label: "Any" },
   { value: "american_restaurant", label: "American" },
   { value: "asian_restaurant", label: "Asian" },
   { value: "barbecue_restaurant", label: "BBQ" },
@@ -37,6 +38,20 @@ const CUISINE_TYPES = [
   { value: "vietnamese_restaurant", label: "Vietnamese" },
 ];
 
+// Shown by default; the full list is one tap or a search away.
+const POPULAR_CUISINES = new Set([
+  "italian_restaurant",
+  "japanese_restaurant",
+  "chinese_restaurant",
+  "mexican_restaurant",
+  "indian_restaurant",
+  "thai_restaurant",
+  "pizza_restaurant",
+  "hamburger_restaurant",
+  "sushi_restaurant",
+  "mediterranean_restaurant",
+]);
+
 const PRICE_LEVELS = [
   { value: "PRICE_LEVEL_INEXPENSIVE", label: "$" },
   { value: "PRICE_LEVEL_MODERATE", label: "$$" },
@@ -45,25 +60,60 @@ const PRICE_LEVELS = [
 ];
 
 const RATING_OPTIONS = [
-  { value: 0, label: "Any" },
   { value: 3, label: "3+" },
   { value: 3.5, label: "3.5+" },
   { value: 4, label: "4+" },
   { value: 4.5, label: "4.5+" },
 ];
 
-const DEFAULT_FILTERS = {
-  isOpen: true,
-  isRestaurant: true,
-  isCafe: false,
-  priceLevels: [],
-  minRating: 0,
-  cuisineType: "",
-};
+function isDefault(f) {
+  return (
+    f.isOpen === DEFAULT_FILTERS.isOpen &&
+    f.isRestaurant === DEFAULT_FILTERS.isRestaurant &&
+    f.isCafe === DEFAULT_FILTERS.isCafe &&
+    (f.priceLevels || []).length === 0 &&
+    !f.minRating &&
+    (f.cuisineTypes || []).length === 0
+  );
+}
+
+function toggleIn(list, value) {
+  return list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
+}
+
+function Chip({ active, onClick, children }) {
+  return (
+    <button
+      type="button"
+      className={`filter-chip${active ? " active" : ""}`}
+      aria-pressed={active}
+      onClick={onClick}
+    >
+      {children}
+    </button>
+  );
+}
+
+function Section({ label, count = 0, aside, children }) {
+  return (
+    <div className="filter-section">
+      <div className="filter-section-head">
+        <span className="filter-section-label">
+          {label}
+          {count > 0 && <span className="filter-section-count">{count}</span>}
+        </span>
+        {aside}
+      </div>
+      {children}
+    </div>
+  );
+}
 
 export default function FilterModal({ filters, onApply, onClose }) {
   // Work on a local copy so changes can be discarded
   const [draft, setDraft] = useState({ ...filters });
+  const [cuisineQuery, setCuisineQuery] = useState("");
+  const [showAllCuisines, setShowAllCuisines] = useState(false);
 
   // Sync if parent filters change while open
   useEffect(() => {
@@ -79,16 +129,32 @@ export default function FilterModal({ filters, onApply, onClose }) {
     return () => document.removeEventListener("keydown", handleKey);
   }, [onClose]);
 
-  function togglePriceLevel(level) {
-    const current = draft.priceLevels || [];
-    const updated = current.includes(level)
-      ? current.filter(l => l !== level)
-      : [...current, level];
-    setDraft({ ...draft, priceLevels: updated });
+  const update = (patch) => setDraft((d) => ({ ...d, ...patch }));
+  const priceLevels = draft.priceLevels || [];
+  const cuisineTypes = draft.cuisineTypes || [];
+
+  // Keep at least one place type on, otherwise the search silently
+  // falls back to "restaurant" which would be confusing.
+  function toggleType(key) {
+    const other = key === "isRestaurant" ? "isCafe" : "isRestaurant";
+    if (draft[key] && !draft[other]) return;
+    update({ [key]: !draft[key] });
   }
+
+  const togglePriceLevel = (level) => update({ priceLevels: toggleIn(priceLevels, level) });
+  const toggleCuisine = (value) => update({ cuisineTypes: toggleIn(cuisineTypes, value) });
+
+  const query = cuisineQuery.trim().toLowerCase();
+  const visibleCuisines = query
+    ? CUISINE_TYPES.filter((c) => c.label.toLowerCase().includes(query))
+    : showAllCuisines
+    ? CUISINE_TYPES
+    : CUISINE_TYPES.filter((c) => POPULAR_CUISINES.has(c.value) || cuisineTypes.includes(c.value));
 
   function handleReset() {
     setDraft({ ...DEFAULT_FILTERS });
+    setCuisineQuery("");
+    setShowAllCuisines(false);
   }
 
   function handleApply() {
@@ -99,108 +165,130 @@ export default function FilterModal({ filters, onApply, onClose }) {
   return (
     <div className="filter-modal-overlay" onClick={onClose} role="dialog" aria-modal="true" aria-label="Search filters">
       <div className="filter-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="sheet-handle" aria-hidden="true" />
         <button className="filter-modal-close" onClick={onClose} type="button" aria-label="Close filters">×</button>
 
         <h2 className="filter-modal-title">Filters</h2>
 
         <div className="filter-modal-content">
-          {/* Open Now toggle */}
-          <div className="filter-modal-section">
-            <label className="filter-toggle-row">
-              <span className="filter-toggle-label">Open Now</span>
-              <div className={`filter-toggle-switch ${draft.isOpen ? "active" : ""}`} onClick={() => setDraft({ ...draft, isOpen: !draft.isOpen })}>
-                <div className="filter-toggle-knob" />
-              </div>
-            </label>
+          <div className="filter-switch-row">
+            <div>
+              <div className="filter-switch-label">Open now</div>
+              <div className="filter-switch-hint">Only show places that are open right now</div>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={draft.isOpen}
+              aria-label="Open now"
+              className={`filter-switch${draft.isOpen ? " active" : ""}`}
+              onClick={() => update({ isOpen: !draft.isOpen })}
+            >
+              <span className="filter-switch-knob" />
+            </button>
           </div>
 
           <div className="filter-modal-divider" />
 
-          {/* Establishment Type + Price Range side by side */}
           <div className="filter-modal-row">
             <div className="filter-modal-col">
-              <div className="filter-modal-section-label">Establishment</div>
-              <div className="filter-chip-group">
-                <button
-                  type="button"
-                  className={`filter-chip ${draft.isRestaurant ? "active" : ""}`}
-                  onClick={() => setDraft({ ...draft, isRestaurant: !draft.isRestaurant })}
-                >
-                  Restaurants
-                </button>
-                <button
-                  type="button"
-                  className={`filter-chip ${draft.isCafe ? "active" : ""}`}
-                  onClick={() => setDraft({ ...draft, isCafe: !draft.isCafe })}
-                >
-                  Cafes
-                </button>
-              </div>
+              <Section label="Place type">
+                <div className="filter-chip-group">
+                  <Chip active={draft.isRestaurant} onClick={() => toggleType("isRestaurant")}>Restaurants</Chip>
+                  <Chip active={draft.isCafe} onClick={() => toggleType("isCafe")}>Cafes</Chip>
+                </div>
+              </Section>
             </div>
 
             <div className="filter-modal-col">
-              <div className="filter-modal-section-label">Price Range</div>
-              <div className="filter-chip-group">
-                {PRICE_LEVELS.map(p => (
-                  <button
-                    key={p.value}
-                    type="button"
-                    className={`filter-chip ${(draft.priceLevels || []).includes(p.value) ? "active" : ""}`}
-                    onClick={() => togglePriceLevel(p.value)}
-                  >
-                    {p.label}
-                  </button>
-                ))}
-              </div>
+              <Section label="Price">
+                <div className="filter-chip-group">
+                  <Chip active={priceLevels.length === 0} onClick={() => update({ priceLevels: [] })}>Any</Chip>
+                  {PRICE_LEVELS.map((p) => (
+                    <Chip key={p.value} active={priceLevels.includes(p.value)} onClick={() => togglePriceLevel(p.value)}>
+                      {p.label}
+                    </Chip>
+                  ))}
+                </div>
+              </Section>
             </div>
           </div>
 
           <div className="filter-modal-divider" />
 
-          {/* Cuisine */}
-          <div className="filter-modal-section">
-            <div className="filter-modal-section-label">Cuisine</div>
-            <div className="filter-chip-group cuisine-grid">
-              {CUISINE_TYPES.map(c => (
-                <button
-                  key={c.value}
-                  type="button"
-                  className={`filter-chip ${draft.cuisineType === c.value ? "active" : ""}`}
-                  onClick={() => setDraft({ ...draft, cuisineType: c.value })}
-                >
-                  {c.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="filter-modal-divider" />
-
-          {/* Minimum Rating */}
-          <div className="filter-modal-section">
-            <div className="filter-modal-section-label">Minimum Rating</div>
+          <Section label="Minimum rating">
             <div className="filter-chip-group">
-              {RATING_OPTIONS.map(r => (
-                <button
-                  key={r.value}
-                  type="button"
-                  className={`filter-chip ${draft.minRating === r.value ? "active" : ""}`}
-                  onClick={() => setDraft({ ...draft, minRating: r.value })}
-                >
-                  {r.value > 0 && "★ "}{r.label}
-                </button>
+              <Chip active={!draft.minRating} onClick={() => update({ minRating: 0 })}>Any</Chip>
+              {RATING_OPTIONS.map((r) => (
+                <Chip key={r.value} active={draft.minRating === r.value} onClick={() => update({ minRating: r.value })}>
+                  ★ {r.label}
+                </Chip>
               ))}
             </div>
-          </div>
+          </Section>
+
+          <div className="filter-modal-divider" />
+
+          <Section
+            label="Cuisine"
+            count={cuisineTypes.length}
+            aside={
+              <div className="filter-search">
+                <SearchIcon size={14} />
+                <input
+                  type="text"
+                  value={cuisineQuery}
+                  onChange={(e) => setCuisineQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && visibleCuisines.length === 1) {
+                      toggleCuisine(visibleCuisines[0].value);
+                      setCuisineQuery("");
+                    }
+                  }}
+                  placeholder="Search cuisines"
+                  aria-label="Search cuisines"
+                  autoComplete="off"
+                />
+                {cuisineQuery && (
+                  <button type="button" className="filter-search-clear" onClick={() => setCuisineQuery("")} aria-label="Clear search">
+                    ×
+                  </button>
+                )}
+              </div>
+            }
+          >
+            <div className="filter-chip-group">
+              {!query && (
+                <Chip active={cuisineTypes.length === 0} onClick={() => update({ cuisineTypes: [] })}>Any</Chip>
+              )}
+              {visibleCuisines.map((c) => (
+                <Chip key={c.value} active={cuisineTypes.includes(c.value)} onClick={() => toggleCuisine(c.value)}>
+                  {c.label}
+                </Chip>
+              ))}
+              {!query && (
+                <button
+                  type="button"
+                  className="filter-chip ghost"
+                  aria-expanded={showAllCuisines}
+                  onClick={() => setShowAllCuisines((v) => !v)}
+                >
+                  {showAllCuisines ? "Show fewer" : `All ${CUISINE_TYPES.length} cuisines`}
+                </button>
+              )}
+            </div>
+            {query && visibleCuisines.length === 0 && (
+              <div className="filter-empty">No cuisines match “{cuisineQuery.trim()}”</div>
+            )}
+          </Section>
         </div>
 
-        {/* Sticky footer */}
         <div className="filter-modal-footer">
-          <button type="button" className="filter-reset-btn" onClick={handleReset}>
-            Reset Filters
+          <button type="button" className="filter-reset-btn" onClick={handleReset} disabled={isDefault(draft)}>
+            Reset
           </button>
           <button type="button" className="filter-apply-btn" onClick={handleApply}>
-            Apply Filters
+            Apply filters
           </button>
         </div>
       </div>
