@@ -22,9 +22,11 @@
 
   /* Surfaces */
   --bg: var(--beige-100);
-  --surface: rgba(245, 236, 223, 0.88);
-  --surface-strong: rgba(251, 248, 243, 0.96);
-  --surface-solid: var(--cream);
+  /* Panel body: paler beige, less see-through so the map tone does not bleed in.
+     Bands, search bar and buttons: near-white so they sit a clear step above the map. */
+  --surface: rgba(249, 244, 236, 0.94);
+  --surface-strong: rgba(255, 254, 251, 0.97);
+  --surface-solid: #ffffff;
   --border: rgba(99, 0, 30, 0.1);
   --border-strong: rgba(99, 0, 30, 0.18);
   --fill: rgba(99, 0, 30, 0.05);
@@ -450,9 +452,9 @@ a {
   background: var(--surface);
   backdrop-filter: var(--blur);
   -webkit-backdrop-filter: var(--blur);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-strong);
   border-radius: var(--r-xl);
-  box-shadow: var(--shadow-lg), var(--highlight);
+  box-shadow: 0 2px 6px rgba(42, 13, 16, 0.08), var(--shadow-lg), var(--highlight);
   display: flex;
   flex-direction: column;
   z-index: 15;
