@@ -390,7 +390,7 @@ export default function App() {
             ${meta ? `<div class="iw-meta">${meta}</div>` : ""}
             <div class="iw-address">${r.address}</div>
             <button type="button" data-toggle class="iw-toggle${isSelected ? " on" : ""}" aria-pressed="${isSelected}">
-              ${isSelected ? "Selected" : "Select"}
+              ${isSelected ? "Selected" : "Not selected"}
             </button>
             ${r.mapsUrl ? `<a class="iw-link" href="${r.mapsUrl}" target="_blank" rel="noopener noreferrer">Open in Google Maps<span aria-hidden="true"> ↗</span></a>` : ""}
           </div>

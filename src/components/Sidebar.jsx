@@ -137,6 +137,7 @@ export default function Sidebar({
           <ul className="restaurant-list">
             {restaurants.map((restaurant, index) => {
               const selected = selectedIndexes.includes(index);
+              const price = priceToSymbols(restaurant.priceLevel);
               return (
                 <li
                   key={restaurant.id ?? index}
@@ -162,21 +163,16 @@ export default function Sidebar({
                   )}
                   <div className="restaurant-details">
                     <div className="restaurant-name">{restaurant.name}</div>
-                    <div className="restaurant-meta">
-                      {restaurant.rating && (
-                        <>
+                    {(restaurant.rating || price) && (
+                      <div className="restaurant-meta">
+                        {restaurant.rating && (
                           <span className="restaurant-rating">★ {restaurant.rating.toFixed(1)}</span>
-                          <span className="dot" />
-                        </>
-                      )}
-                      {priceToSymbols(restaurant.priceLevel) && (
-                        <>
-                          <span>{priceToSymbols(restaurant.priceLevel)}</span>
-                          <span className="dot" />
-                        </>
-                      )}
-                      <span>{restaurant.address}</span>
-                    </div>
+                        )}
+                        {restaurant.rating && price && <span className="dot" />}
+                        {price && <span>{price}</span>}
+                      </div>
+                    )}
+                    <div className="restaurant-address" title={restaurant.address}>{restaurant.address}</div>
                   </div>
                 </li>
               );

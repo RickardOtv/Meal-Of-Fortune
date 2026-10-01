@@ -560,7 +560,8 @@ a {
 }
 
 .restaurant-item:not(.selected) .restaurant-name,
-.restaurant-item:not(.selected) .restaurant-meta {
+.restaurant-item:not(.selected) .restaurant-meta,
+.restaurant-item:not(.selected) .restaurant-address {
   color: var(--text-muted);
 }
 
@@ -655,11 +656,19 @@ a {
   font-size: 12px;
   color: var(--text-secondary);
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+/* Address sits on its own line so it gets the full width, and truncates
+   with an ellipsis instead of being clipped. */
+.restaurant-address {
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .restaurant-meta .dot {
@@ -944,7 +953,7 @@ a {
 }
 
 /* Primary action: filled when the place is in the wheel ("Selected"),
-   outlined when it is not ("Select"). */
+   outlined when it is not ("Not selected"). */
 .iw-toggle {
   display: flex;
   align-items: center;
