@@ -22,6 +22,22 @@ const SAND = "#cdb79b";
 const SAND_DARK = "#a98f71";
 const CONFETTI_COLORS = [GOLD, GOLD_LIGHT, CREAM, WINE_500, WINE_700];
 
+// Places are teardrop pins; "you are here" is a ringed dot with a halo, so the
+// two never read alike regardless of color.
+const PIN_PATH = "M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z";
+
+function pinIcon(fillColor, strokeColor, scale = 1.4, strokeWeight = 1.5) {
+  return {
+    path: PIN_PATH,
+    fillColor,
+    fillOpacity: 1,
+    strokeColor,
+    strokeWeight,
+    scale,
+    anchor: new window.google.maps.Point(12, 22),
+  };
+}
+
 function priceToSymbols(priceLevel) {
   if (!priceLevel) return "";
   const priceLabels = {
@@ -47,35 +63,35 @@ function loadFilters() {
   return { ...DEFAULT_FILTERS };
 }
 
-// Warm retro map: tan land a shade deeper than the beige panels so they float,
-// olive parks, teal-blue water, golden highways, cream streets. Business POIs
-// and all icons are hidden so they do not compete with the restaurant markers.
+// Lightly warmed map, close to Google's default colors: soft warm-grey land,
+// fresh green parks, blue water, pale yellow highways, white streets. Business
+// POIs and all icons are hidden so they do not compete with the restaurant pins.
 const MAP_STYLE = [
-  { elementType: "geometry", stylers: [{ color: "#ebe3cd" }] },
+  { elementType: "geometry", stylers: [{ color: "#f1ece3" }] },
   { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
   { elementType: "labels.text.fill", stylers: [{ color: "#5a4046" }] },
-  { elementType: "labels.text.stroke", stylers: [{ color: "#f5f1e6" }] },
-  { featureType: "administrative", elementType: "geometry.stroke", stylers: [{ color: "#c9b2a6" }] },
+  { elementType: "labels.text.stroke", stylers: [{ color: "#f8f5ef" }] },
+  { featureType: "administrative", elementType: "geometry.stroke", stylers: [{ color: "#cfc3b3" }] },
   { featureType: "administrative.land_parcel", stylers: [{ visibility: "off" }] },
   { featureType: "administrative.neighborhood", elementType: "labels.text.fill", stylers: [{ color: "#8a6f74" }] },
-  { featureType: "landscape.natural", elementType: "geometry", stylers: [{ color: "#dfd2ae" }] },
-  { featureType: "poi", elementType: "geometry", stylers: [{ color: "#dfd2ae" }] },
+  { featureType: "landscape.natural", elementType: "geometry", stylers: [{ color: "#ebe6da" }] },
+  { featureType: "poi", elementType: "geometry", stylers: [{ color: "#e8e2d3" }] },
   { featureType: "poi", elementType: "labels.text.fill", stylers: [{ color: "#93817c" }] },
   { featureType: "poi.business", stylers: [{ visibility: "off" }] },
-  { featureType: "poi.park", elementType: "geometry.fill", stylers: [{ color: "#a9b97c" }] },
-  { featureType: "poi.park", elementType: "labels.text.fill", stylers: [{ color: "#4b6b2f" }] },
-  { featureType: "road", elementType: "geometry", stylers: [{ color: "#f5f1e6" }] },
-  { featureType: "road.arterial", elementType: "geometry", stylers: [{ color: "#fdfcf8" }] },
-  { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#f1cc7f" }] },
-  { featureType: "road.highway", elementType: "geometry.stroke", stylers: [{ color: "#dfb86a" }] },
-  { featureType: "road.highway.controlled_access", elementType: "geometry", stylers: [{ color: "#e3b074" }] },
-  { featureType: "road.highway.controlled_access", elementType: "geometry.stroke", stylers: [{ color: "#d19d5e" }] },
+  { featureType: "poi.park", elementType: "geometry.fill", stylers: [{ color: "#c5dcb0" }] },
+  { featureType: "poi.park", elementType: "labels.text.fill", stylers: [{ color: "#4b7b3a" }] },
+  { featureType: "road", elementType: "geometry", stylers: [{ color: "#ffffff" }] },
+  { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#e6dfd3" }] },
+  { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#f7dd8e" }] },
+  { featureType: "road.highway", elementType: "geometry.stroke", stylers: [{ color: "#e8c86f" }] },
+  { featureType: "road.highway.controlled_access", elementType: "geometry", stylers: [{ color: "#f2c069" }] },
+  { featureType: "road.highway.controlled_access", elementType: "geometry.stroke", stylers: [{ color: "#dfae57" }] },
   { featureType: "road.local", elementType: "labels.text.fill", stylers: [{ color: "#806b63" }] },
-  { featureType: "transit.line", elementType: "geometry", stylers: [{ color: "#dfd2ae" }] },
+  { featureType: "transit.line", elementType: "geometry", stylers: [{ color: "#e2dccd" }] },
   { featureType: "transit.line", elementType: "labels.text.fill", stylers: [{ color: "#8f7d77" }] },
-  { featureType: "transit.station", elementType: "geometry", stylers: [{ color: "#dfd2ae" }] },
-  { featureType: "water", elementType: "geometry.fill", stylers: [{ color: "#a9c6cf" }] },
-  { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#6b8a93" }] },
+  { featureType: "transit.station", elementType: "geometry", stylers: [{ color: "#e2dccd" }] },
+  { featureType: "water", elementType: "geometry.fill", stylers: [{ color: "#a8cde0" }] },
+  { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#5f7f8f" }] },
 ];
 
 export default function App() {
@@ -114,14 +130,9 @@ export default function App() {
     selectedIndexesRef.current = selectedIndexes;
     markersRef.current.forEach((marker, idx) => {
       const isSelected = selectedIndexes.includes(idx);
-      marker.setIcon({
-        path: window.google?.maps?.SymbolPath?.CIRCLE ?? 0,
-        fillColor: isSelected ? WINE_700 : SAND,
-        fillOpacity: 1,
-        strokeWeight: isSelected ? 2 : 1.5,
-        strokeColor: isSelected ? CREAM : SAND_DARK,
-        scale: 9,
-      });
+      marker.setIcon(
+        isSelected ? pinIcon(WINE_700, CREAM) : pinIcon(SAND, SAND_DARK)
+      );
     });
   }, [selectedIndexes]);
 
@@ -160,17 +171,33 @@ export default function App() {
         gestureHandling: "greedy",
       });
 
+      // Soft halo under a ringed dot, the universal "you are here" signal
+      new google.maps.Marker({
+        map: mapRef.current,
+        position: loc,
+        clickable: false,
+        zIndex: 1,
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          fillColor: WINE_700,
+          fillOpacity: 0.16,
+          strokeWeight: 0,
+          scale: 24,
+        },
+      });
       new google.maps.Marker({
         map: mapRef.current,
         position: loc,
         title: "You are here",
+        clickable: false,
+        zIndex: 2,
         icon: {
           path: google.maps.SymbolPath.CIRCLE,
-          fillColor: GOLD,
+          fillColor: WINE_700,
           fillOpacity: 1,
           strokeWeight: 3,
-          strokeColor: WINE_900,
-          scale: 10,
+          strokeColor: "#ffffff",
+          scale: 8,
         },
       });
 
@@ -341,14 +368,8 @@ export default function App() {
         map: mapRef.current,
         position: r.location,
         title: r.name,
-        icon: {
-          path: google.maps.SymbolPath.CIRCLE,
-          fillColor: WINE_700,
-          fillOpacity: 1,
-          strokeWeight: 2,
-          strokeColor: CREAM,
-          scale: 9,
-        },
+        icon: pinIcon(WINE_700, CREAM),
+        anchorPoint: new google.maps.Point(0, -30),
       });
 
       const buildContent = () => {
@@ -439,14 +460,10 @@ export default function App() {
 
       markersRef.current.forEach((marker, idx) => {
         const isWinner = idx === chosenIndex;
-        marker.setIcon({
-          path: window.google.maps.SymbolPath.CIRCLE,
-          fillColor: isWinner ? GOLD : WINE_700,
-          fillOpacity: 1,
-          strokeWeight: isWinner ? 2.5 : 2,
-          strokeColor: isWinner ? WINE_900 : CREAM,
-          scale: isWinner ? 13 : 9,
-        });
+        marker.setIcon(
+          isWinner ? pinIcon(GOLD, WINE_900, 1.9, 2) : pinIcon(WINE_700, CREAM)
+        );
+        marker.setZIndex(isWinner ? window.google.maps.Marker.MAX_ZINDEX + 1 : null);
         if (isWinner) {
           window.google.maps.event.trigger(marker, "click");
         }
