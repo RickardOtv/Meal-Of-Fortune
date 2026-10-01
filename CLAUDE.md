@@ -56,7 +56,7 @@ All styles are in [index.css](src/index.css). Design tokens live in `:root`; use
 - **Palette**: bordeaux primary (`--wine-700` #63001e, darker `--wine-900`/`--wine-950` for text), beige/cream surfaces (`--beige-100` #f5ecdf ground, also the dialog paper via `--sheet`; `--cream` #fbf8f3 for raised elements), muted antique gold accent (`--gold` #b8955a) only for ratings, badges, the wheel rim and the user-location dot. No cool greys.
 - **Type**: Inter (`--font-ui`) for UI text, Fraunces (`--font-display`) for the brand name, panel/modal titles and wheel text.
 - **Surfaces**: translucent beige glass (`--surface` + `--blur`), wine-tinted borders and shadows, large radii (`--r-md` to `--r-xl`).
-- **Map**: warm parchment style in `MAP_STYLE` in App.jsx. Marker and confetti colors are constants at the top of App.jsx and must stay in sync with the CSS tokens.
+- **Map**: warm retro style in `MAP_STYLE` in App.jsx (tan land, olive parks, teal water, golden highways; business POIs and icons hidden). Marker and confetti colors are constants at the top of App.jsx and must stay in sync with the CSS tokens.
 
 ## Rules
 
