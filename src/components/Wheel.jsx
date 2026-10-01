@@ -26,7 +26,7 @@ export default function Wheel({ wheelText, spinWheel, onClose }) {
         >
           ×
         </button>
-        <div className="wheel-modal-title">Wheel of Fortune</div>
+        <div className="wheel-modal-title">Meal of Fortune</div>
         <div className="wheel-stage">
           <div className="wheel-pointer" aria-hidden="true" />
           <div
