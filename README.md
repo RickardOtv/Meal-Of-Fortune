@@ -7,7 +7,7 @@ Turn indecision into adventure! Meal of Fortune gamifies the "where should we ea
 ## Features
 
 - **Fortune Wheel**: Spin to randomly select a restaurant from your search results
-- **Interactive Map**: View restaurants on an integrated Google Maps interface with custom gothic-themed markers
+- **Interactive Map**: View restaurants on an integrated Google Maps interface
 - **Map Viewport Search**: Search for restaurants within the visible map area (up to 60 results)
 - **Advanced Filters**: Filter by open restaurants, restaurants, and cafes (Open Now enabled by default)
 - **Restaurant Selection**: Choose which restaurants to include in the wheel spin
