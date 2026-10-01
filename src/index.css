@@ -925,6 +925,10 @@ a {
   color: #4b7b3a;
 }
 
+.iw-closed {
+  color: #b23a3a;
+}
+
 .iw-dot {
   width: 3px;
   height: 3px;
@@ -939,8 +943,8 @@ a {
   color: var(--text-secondary);
 }
 
-/* Primary action: a labelled checkbox-style button that states the current
-   membership ("In the wheel") or the action ("Add to the wheel"). */
+/* Primary action: filled when the place is in the wheel ("Selected"),
+   outlined when it is not ("Select"). */
 .iw-toggle {
   display: flex;
   align-items: center;
@@ -966,32 +970,6 @@ a {
   background: var(--wine-700);
   border-color: var(--wine-700);
   color: var(--text-on-wine);
-}
-
-.iw-check {
-  position: relative;
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
-  border-radius: 4px;
-  border: 1.5px solid currentColor;
-}
-
-.iw-toggle.on .iw-check {
-  background: var(--cream);
-  border-color: var(--cream);
-}
-
-.iw-toggle.on .iw-check::after {
-  content: '';
-  position: absolute;
-  left: 4px;
-  top: 1px;
-  width: 4px;
-  height: 8px;
-  border: solid var(--wine-700);
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
 }
 
 /* Secondary action: quiet text link */

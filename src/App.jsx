@@ -320,7 +320,7 @@ export default function App() {
         ? `https://places.googleapis.com/v1/${place.photos[0].name}/media?key=${GOOGLE_MAPS_API_KEY}&maxHeightPx=320&maxWidthPx=480`
         : null,
       mapsUrl: place.googleMapsUri,
-      isOpen: place.currentOpeningHours?.openNow === true,
+      isOpen: place.currentOpeningHours?.openNow, // true, false, or undefined when unknown
     }));
 
     if (appliedFilters.isOpen) {
@@ -378,7 +378,8 @@ export default function App() {
         const meta = [
           r.rating ? `<span class="iw-rating">★ ${r.rating.toFixed(1)}</span>` : "",
           price ? `<span>${price}</span>` : "",
-          r.isOpen ? `<span class="iw-open">Open now</span>` : "",
+          r.isOpen === true ? `<span class="iw-open">Open now</span>` : "",
+          r.isOpen === false ? `<span class="iw-closed">Closed</span>` : "",
         ].filter(Boolean).join('<span class="iw-dot"></span>');
         const div = document.createElement("div");
         div.className = "iw";
@@ -389,7 +390,7 @@ export default function App() {
             ${meta ? `<div class="iw-meta">${meta}</div>` : ""}
             <div class="iw-address">${r.address}</div>
             <button type="button" data-toggle class="iw-toggle${isSelected ? " on" : ""}" aria-pressed="${isSelected}">
-              <span class="iw-check"></span>${isSelected ? "In the wheel" : "Add to the wheel"}
+              ${isSelected ? "Selected" : "Select"}
             </button>
             ${r.mapsUrl ? `<a class="iw-link" href="${r.mapsUrl}" target="_blank" rel="noopener noreferrer">Open in Google Maps<span aria-hidden="true"> ↗</span></a>` : ""}
           </div>
