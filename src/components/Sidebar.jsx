@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from "react";
-
+import { PinIcon, RefreshIcon, MapIcon, SearchIcon, UtensilsIcon } from "./icons";
 
 export default function Sidebar({
   restaurants,
@@ -121,14 +121,14 @@ export default function Sidebar({
 
         {!isSearching && !hasSearched && !hasResults && (
           <div className="panel-empty">
-            <div className="panel-empty-icon">🗺️</div>
+            <div className="panel-empty-icon"><MapIcon size={24} strokeWidth={1.8} /></div>
             Move the map to where you are, then tap <strong>Search</strong> to find places nearby.
           </div>
         )}
 
         {!isSearching && hasSearched && !hasResults && (
           <div className="panel-empty">
-            <div className="panel-empty-icon">🔎</div>
+            <div className="panel-empty-icon"><SearchIcon size={24} strokeWidth={1.8} /></div>
             No results in this area. Try moving the map or adjusting filters.
           </div>
         )}
@@ -158,7 +158,7 @@ export default function Sidebar({
                       className="restaurant-photo"
                     />
                   ) : (
-                    <div className="restaurant-photo-placeholder">🍽️</div>
+                    <div className="restaurant-photo-placeholder"><UtensilsIcon size={22} strokeWidth={1.8} /></div>
                   )}
                   <div className="restaurant-details">
                     <div className="restaurant-name">{restaurant.name}</div>
@@ -200,10 +200,7 @@ export default function Sidebar({
               </>
             ) : (
               <>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1 1 18 0z" />
-                  <circle cx="12" cy="10" r="3" />
-                </svg>
+                <PinIcon size={16} strokeWidth={2.4} />
                 Search this area
               </>
             )}
@@ -220,12 +217,7 @@ export default function Sidebar({
               {isSearching ? (
                 <span className="spinner dark" />
               ) : (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M23 4v6h-6" />
-                  <path d="M1 20v-6h6" />
-                  <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10" />
-                  <path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14" />
-                </svg>
+                <RefreshIcon size={16} strokeWidth={2.4} />
               )}
               <span>Search again</span>
             </button>

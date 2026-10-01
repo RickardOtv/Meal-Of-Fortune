@@ -27,20 +27,23 @@ export default function Wheel({ wheelText, spinWheel, onClose }) {
           ×
         </button>
         <div className="wheel-modal-title">Wheel of Fortune</div>
-        <div
-          id="wheel"
-          onClick={spinWheel}
-          role="button"
-          tabIndex={0}
-          aria-label="Spin the wheel"
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault();
-              spinWheel();
-            }
-          }}
-        >
-          {wheelText}
+        <div className="wheel-stage">
+          <div className="wheel-pointer" aria-hidden="true" />
+          <div
+            id="wheel"
+            onClick={spinWheel}
+            role="button"
+            tabIndex={0}
+            aria-label="Spin the wheel"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                spinWheel();
+              }
+            }}
+          >
+            <div className="wheel-hub">{wheelText}</div>
+          </div>
         </div>
         <div className="wheel-modal-hint">Tap the wheel to spin</div>
       </div>

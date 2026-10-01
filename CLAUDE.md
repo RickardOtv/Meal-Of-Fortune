@@ -35,9 +35,11 @@ All state lives in [App.jsx](src/App.jsx) and flows down to components via props
 ### Component Structure
 
 - **App.jsx** - Contains all business logic: Google Maps initialization, Places API fetching with pagination (up to 60 results), wheel spin logic, marker management
-- **Wheel.jsx** - Fortune wheel UI with filter dropdown, handles click-outside behavior
+- **Wheel.jsx** - Fortune wheel modal: pointer, segmented wheel, cream hub that shows the result
 - **Map.jsx** - Simple container for the Google Maps div (actual map logic is in App)
-- **Sidebar.jsx** - Restaurant list with checkboxes for selection
+- **Sidebar.jsx** - Restaurant list with checkboxes for selection, search/spin footer, mobile bottom-sheet drag
+- **FilterModal.jsx** - Filter dialog (open now, establishment, price, cuisine, rating)
+- **icons.jsx** - Inline SVG icon components; use these instead of emoji or ad-hoc SVGs
 
 ### Google Maps Integration
 
@@ -49,7 +51,12 @@ Uses the new Places API (`places.googleapis.com/v1/places:searchText`) with `loc
 
 ## Styling
 
-All styles are in [index.css](src/index.css) using a dark gothic/academia theme with burgundy (`#6b2d5c`), gold (`#d4af37`), and cream (`#f4e4c1`) colors. Uses the Cinzel font family.
+All styles are in [index.css](src/index.css). Design tokens live in `:root`; use them instead of raw hex values.
+
+- **Palette**: bordeaux primary (`--wine-700` #63001e, darker `--wine-900`/`--wine-950` for text), beige/cream surfaces (`--beige-100` #f6efe6 ground, `--cream` #fbf8f3), muted antique gold accent (`--gold` #b8955a) only for ratings, badges, the wheel rim and the user-location dot. No cool greys.
+- **Type**: Inter (`--font-ui`) for UI text, Fraunces (`--font-display`) for the brand name, panel/modal titles and wheel text.
+- **Surfaces**: translucent beige glass (`--surface` + `--blur`), wine-tinted borders and shadows, large radii (`--r-md` to `--r-xl`).
+- **Map**: warm parchment style in `MAP_STYLE` in App.jsx. Marker and confetti colors are constants at the top of App.jsx and must stay in sync with the CSS tokens.
 
 ## Rules
 

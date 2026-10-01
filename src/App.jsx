@@ -6,14 +6,20 @@ import Wheel from "./components/Wheel";
 import Map from "./components/Map";
 import Sidebar from "./components/Sidebar";
 import FilterModal from "./components/FilterModal";
+import { FilterIcon, SearchIcon } from "./components/icons";
 
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
 // Brand colors (keep in sync with index.css)
-const NAVY_900 = "#0b1a33";
-const NAVY_500 = "#1e3a6b";
-const GOLD = "#c9a348";
-const GOLD_LIGHT = "#e4c574";
+const WINE_700 = "#63001e";
+const WINE_900 = "#3d0012";
+const WINE_500 = "#8f2a45";
+const GOLD = "#b8955a";
+const GOLD_LIGHT = "#d4b98a";
+const CREAM = "#fbf8f3";
+const SAND = "#cdb79b";
+const SAND_DARK = "#a98f71";
+const CONFETTI_COLORS = [GOLD, GOLD_LIGHT, CREAM, WINE_500, WINE_700];
 
 function priceToSymbols(priceLevel) {
   if (!priceLevel) return "";
@@ -42,27 +48,29 @@ function loadFilters() {
   };
 }
 
-// Light map style — clean Apple-ish look with enough contrast to read features
+// Warm parchment map — beige land, cream roads, muted sage parks, dusty water
 const MAP_STYLE = [
-  { elementType: "geometry", stylers: [{ color: "#eef0f4" }] },
+  { elementType: "geometry", stylers: [{ color: "#efe6d8" }] },
   { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
-  { elementType: "labels.text.fill", stylers: [{ color: "#4a5568" }] },
-  { elementType: "labels.text.stroke", stylers: [{ color: "#ffffff" }] },
+  { elementType: "labels.text.fill", stylers: [{ color: "#6e4e53" }] },
+  { elementType: "labels.text.stroke", stylers: [{ color: "#f6efe6" }] },
+  { featureType: "administrative", elementType: "geometry.stroke", stylers: [{ color: "#d9c6ac" }] },
   { featureType: "administrative.land_parcel", stylers: [{ visibility: "off" }] },
   { featureType: "administrative.neighborhood", stylers: [{ visibility: "off" }] },
+  { featureType: "landscape.natural", elementType: "geometry", stylers: [{ color: "#e9dfcf" }] },
   { featureType: "poi", stylers: [{ visibility: "off" }] },
-  { featureType: "poi.park", elementType: "geometry", stylers: [{ color: "#d4e3cf" }] },
-  { featureType: "poi.park", elementType: "labels.text.fill", stylers: [{ color: "#4a6b3f" }] },
-  { featureType: "road", elementType: "geometry", stylers: [{ color: "#ffffff" }] },
-  { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#d8dde5" }] },
-  { featureType: "road.arterial", elementType: "geometry", stylers: [{ color: "#ffffff" }] },
-  { featureType: "road.arterial", elementType: "geometry.stroke", stylers: [{ color: "#c8ced9" }] },
-  { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#ffe4a8" }] },
-  { featureType: "road.highway", elementType: "geometry.stroke", stylers: [{ color: "#c9a348" }] },
-  { featureType: "road.local", elementType: "geometry", stylers: [{ color: "#ffffff" }] },
+  { featureType: "poi.park", elementType: "geometry", stylers: [{ color: "#dcdcc4" }] },
+  { featureType: "poi.park", elementType: "labels.text.fill", stylers: [{ color: "#5f6b4a" }] },
+  { featureType: "road", elementType: "geometry", stylers: [{ color: "#fbf8f3" }] },
+  { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#e3d3bf" }] },
+  { featureType: "road.arterial", elementType: "geometry", stylers: [{ color: "#fbf8f3" }] },
+  { featureType: "road.arterial", elementType: "geometry.stroke", stylers: [{ color: "#d9c6ac" }] },
+  { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#f3e3c8" }] },
+  { featureType: "road.highway", elementType: "geometry.stroke", stylers: [{ color: "#d4b98a" }] },
+  { featureType: "road.local", elementType: "geometry", stylers: [{ color: "#fbf8f3" }] },
   { featureType: "transit", stylers: [{ visibility: "off" }] },
-  { featureType: "water", elementType: "geometry", stylers: [{ color: "#a9c8e8" }] },
-  { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#1e3a6b" }] },
+  { featureType: "water", elementType: "geometry", stylers: [{ color: "#c6d1d6" }] },
+  { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#5a6b73" }] },
 ];
 
 export default function App() {
@@ -103,10 +111,10 @@ export default function App() {
       const isSelected = selectedIndexes.includes(idx);
       marker.setIcon({
         path: window.google?.maps?.SymbolPath?.CIRCLE ?? 0,
-        fillColor: isSelected ? NAVY_900 : "#b0b6c3",
+        fillColor: isSelected ? WINE_700 : SAND,
         fillOpacity: 1,
-        strokeWeight: 1.5,
-        strokeColor: isSelected ? GOLD : "#8a90a0",
+        strokeWeight: isSelected ? 2 : 1.5,
+        strokeColor: isSelected ? CREAM : SAND_DARK,
         scale: 9,
       });
     });
@@ -159,8 +167,8 @@ export default function App() {
           path: google.maps.SymbolPath.CIRCLE,
           fillColor: GOLD,
           fillOpacity: 1,
-          strokeWeight: 4,
-          strokeColor: NAVY_900,
+          strokeWeight: 3,
+          strokeColor: WINE_900,
           scale: 10,
         },
       });
@@ -317,10 +325,10 @@ export default function App() {
         title: r.name,
         icon: {
           path: google.maps.SymbolPath.CIRCLE,
-          fillColor: NAVY_900,
+          fillColor: WINE_700,
           fillOpacity: 1,
-          strokeWeight: 1.5,
-          strokeColor: GOLD,
+          strokeWeight: 2,
+          strokeColor: CREAM,
           scale: 9,
         },
       });
@@ -328,16 +336,16 @@ export default function App() {
       const buildContent = () => {
         const isSelected = selectedIndexesRef.current.includes(idx);
         const div = document.createElement("div");
-        div.style.cssText = "width:220px;font-family:-apple-system,BlinkMacSystemFont,sans-serif;";
+        div.className = "iw";
         div.innerHTML = `
-          ${r.photoUrl ? `<img src="${r.photoUrl}" alt="${r.name}" style="display:block;width:100%;height:100px;object-fit:cover;border-radius:6px;margin-bottom:10px;" />` : ""}
-          <div style="font-weight:700;color:#0b1a33;font-size:14px;margin-bottom:4px;line-height:1.3;">${r.name}</div>
-          <div style="color:#4a5568;font-size:11px;margin-bottom:10px;line-height:1.4;">${r.address}</div>
-          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
-            <button type="button" data-toggle style="cursor:pointer;border:none;color:#fff;font-weight:600;font-size:11px;padding:6px 0;border-radius:999px;min-width:86px;text-align:center;background:${isSelected ? "#0b1a33" : "#8a90a0"};">
+          ${r.photoUrl ? `<img class="iw-photo" src="${r.photoUrl}" alt="${r.name}" />` : ""}
+          <div class="iw-name">${r.name}</div>
+          <div class="iw-address">${r.address}</div>
+          <div class="iw-actions">
+            <button type="button" data-toggle class="iw-toggle${isSelected ? "" : " off"}">
               ${isSelected ? "Selected" : "Deselected"}
             </button>
-            ${r.mapsUrl ? `<a href="${r.mapsUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-block;color:#0b1a33;font-weight:600;text-decoration:none;font-size:11px;padding:6px 12px;background:#f0ead9;border-radius:999px;">Open in Google Maps →</a>` : ""}
+            ${r.mapsUrl ? `<a class="iw-link" href="${r.mapsUrl}" target="_blank" rel="noopener noreferrer">Open in Google Maps →</a>` : ""}
           </div>
         `;
         div.querySelector("[data-toggle]")?.addEventListener("click", () => {
@@ -415,10 +423,10 @@ export default function App() {
         const isWinner = idx === chosenIndex;
         marker.setIcon({
           path: window.google.maps.SymbolPath.CIRCLE,
-          fillColor: isWinner ? GOLD : NAVY_900,
+          fillColor: isWinner ? GOLD : WINE_700,
           fillOpacity: 1,
-          strokeWeight: isWinner ? 2 : 1.5,
-          strokeColor: isWinner ? NAVY_900 : GOLD,
+          strokeWeight: isWinner ? 2.5 : 2,
+          strokeColor: isWinner ? WINE_900 : CREAM,
           scale: isWinner ? 13 : 9,
         });
         if (isWinner) {
@@ -439,7 +447,7 @@ export default function App() {
           angle: 60,
           spread: 60,
           origin: { x: 0 },
-          colors: [GOLD, GOLD_LIGHT, "#ffffff", NAVY_500, NAVY_900],
+          colors: CONFETTI_COLORS,
           ticks: 200,
           gravity: 0.8,
           decay: 0.94,
@@ -450,7 +458,7 @@ export default function App() {
           angle: 120,
           spread: 60,
           origin: { x: 1 },
-          colors: [GOLD, GOLD_LIGHT, "#ffffff", NAVY_500, NAVY_900],
+          colors: CONFETTI_COLORS,
           ticks: 200,
           gravity: 0.8,
           decay: 0.94,
@@ -511,18 +519,11 @@ export default function App() {
             aria-label="Filters"
             title="Filters"
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="4" y1="6" x2="20" y2="6" />
-              <line x1="7" y1="12" x2="17" y2="12" />
-              <line x1="10" y1="18" x2="14" y2="18" />
-            </svg>
+            <FilterIcon />
             {activeFilterCount > 0 && <span className="pill-badge">{activeFilterCount}</span>}
           </button>
           <div className="search-wrapper">
-            <svg className="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="11" cy="11" r="7" />
-              <line x1="21" y1="21" x2="16.5" y2="16.5" />
-            </svg>
+            <SearchIcon className="search-icon" />
             <input
               id="location-search"
               type="text"

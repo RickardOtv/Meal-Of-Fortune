@@ -11,8 +11,6 @@ Turn indecision into adventure! Meal of Fortune gamifies the "where should we ea
 - **Map Viewport Search**: Search for restaurants within the visible map area (up to 60 results)
 - **Advanced Filters**: Filter by open restaurants, restaurants, and cafes (Open Now enabled by default)
 - **Restaurant Selection**: Choose which restaurants to include in the wheel spin
-- **Celebration Effects**: Gothic-themed confetti animation when a winner is chosen
-- **Dark Gothic Aesthetic**: Immersive UI with burgundy, gold, and vintage styling
 
 ## Setup
 
