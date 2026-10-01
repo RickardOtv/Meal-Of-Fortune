@@ -409,9 +409,9 @@ a {
   background: conic-gradient(
     from 0deg,
     var(--wine-700) 0deg 90deg,
-    var(--cream) 90deg 180deg,
+    var(--beige-200) 90deg 180deg,
     var(--wine-900) 180deg 270deg,
-    var(--cream) 270deg 360deg
+    var(--beige-200) 270deg 360deg
   );
   border: 1.5px solid var(--gold);
 }
