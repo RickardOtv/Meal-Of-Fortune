@@ -81,6 +81,14 @@ export function MinusIcon(props) {
   );
 }
 
+export function ChevronDownIcon(props) {
+  return (
+    <Icon {...props}>
+      <polyline points="6 9 12 15 18 9" />
+    </Icon>
+  );
+}
+
 export function UtensilsIcon(props) {
   return (
     <Icon {...props}>

@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { SearchIcon } from "./icons";
+import { useState, useEffect, useRef } from "react";
+import { SearchIcon, ChevronDownIcon } from "./icons";
 import { DEFAULT_FILTERS } from "../filters";
 
 const CUISINE_TYPES = [
@@ -114,11 +114,19 @@ export default function FilterModal({ filters, onApply, onClose }) {
   const [draft, setDraft] = useState({ ...filters });
   const [cuisineQuery, setCuisineQuery] = useState("");
   const [showAllCuisines, setShowAllCuisines] = useState(false);
+  const disclosureRef = useRef(null);
 
   // Sync if parent filters change while open
   useEffect(() => {
     setDraft({ ...filters });
   }, [filters]);
+
+  // Keep the "Show fewer" link in view once the full list has pushed it down
+  useEffect(() => {
+    if (showAllCuisines) {
+      disclosureRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }
+  }, [showAllCuisines]);
 
   // Close on Escape
   useEffect(() => {
@@ -266,17 +274,19 @@ export default function FilterModal({ filters, onApply, onClose }) {
                   {c.label}
                 </Chip>
               ))}
-              {!query && (
-                <button
-                  type="button"
-                  className="filter-chip ghost"
-                  aria-expanded={showAllCuisines}
-                  onClick={() => setShowAllCuisines((v) => !v)}
-                >
-                  {showAllCuisines ? "Show fewer" : `All ${CUISINE_TYPES.length} cuisines`}
-                </button>
-              )}
             </div>
+            {!query && (
+              <button
+                ref={disclosureRef}
+                type="button"
+                className="filter-disclosure"
+                aria-expanded={showAllCuisines}
+                onClick={() => setShowAllCuisines((v) => !v)}
+              >
+                {showAllCuisines ? "Show fewer cuisines" : `Show all ${CUISINE_TYPES.length} cuisines`}
+                <ChevronDownIcon size={14} strokeWidth={2.4} />
+              </button>
+            )}
             {query && visibleCuisines.length === 0 && (
               <div className="filter-empty">No cuisines match “{cuisineQuery.trim()}”</div>
             )}

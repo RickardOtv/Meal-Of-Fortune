@@ -251,7 +251,7 @@ a {
   gap: 10px;
   padding: 0 18px;
   height: 52px;
-  background: var(--surface);
+  background: var(--surface-strong);
   backdrop-filter: var(--blur);
   -webkit-backdrop-filter: var(--blur);
   border: 1px solid var(--border);
@@ -293,13 +293,13 @@ a {
   flex-shrink: 0;
   width: 48px;
   height: 48px;
-  background: var(--surface);
+  background: var(--surface-strong);
   backdrop-filter: var(--blur);
   -webkit-backdrop-filter: var(--blur);
   border: 1px solid var(--border);
   border-radius: 50%;
   box-shadow: var(--shadow-md), var(--highlight);
-  color: var(--wine-900);
+  color: var(--wine-700);
   font-size: 18px;
   font-weight: 700;
   display: flex;
@@ -309,7 +309,7 @@ a {
 }
 
 .icon-button:hover {
-  background: var(--surface-strong);
+  background: var(--surface-solid);
 }
 
 .icon-button.primary {
@@ -467,6 +467,13 @@ a {
   padding: 18px 22px 14px;
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
+}
+
+/* Brand row + header share the footer's cream, so the beige list sits
+   between two light bands. */
+.panel-brand,
+.panel-header {
+  background: var(--surface-strong);
 }
 
 .panel-title {
@@ -1310,18 +1317,31 @@ a {
   border-color: var(--wine-700);
 }
 
-/* "All N cuisines" / "Show fewer" toggle */
-.filter-chip.ghost {
-  background: transparent;
-  border: 1px dashed var(--sheet-line-strong);
-  color: var(--text-secondary);
-  box-shadow: none;
+/* "Show all / fewer cuisines" disclosure, on its own line below the chips */
+.filter-disclosure {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 6px 0;
+  color: var(--wine-700);
+  font-size: 13px;
+  font-weight: 600;
+  transition: color 0.15s ease;
 }
 
-.filter-chip.ghost:hover {
-  background: var(--cream);
-  border-color: var(--wine-500);
+.filter-disclosure:hover {
   color: var(--wine-900);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.filter-disclosure svg {
+  transition: transform 0.2s ease;
+}
+
+.filter-disclosure[aria-expanded="true"] svg {
+  transform: rotate(180deg);
 }
 
 /* Cuisine search */
@@ -1592,6 +1612,7 @@ a {
     padding: 8px 0 0;
     cursor: pointer;
     touch-action: none;
+    background: var(--surface-strong);
   }
 
   .panel-handle-bar {
