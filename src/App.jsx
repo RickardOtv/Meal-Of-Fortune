@@ -374,17 +374,24 @@ export default function App() {
 
       const buildContent = () => {
         const isSelected = selectedIndexesRef.current.includes(idx);
+        const price = priceToSymbols(r.priceLevel);
+        const meta = [
+          r.rating ? `<span class="iw-rating">★ ${r.rating.toFixed(1)}</span>` : "",
+          price ? `<span>${price}</span>` : "",
+          r.isOpen ? `<span class="iw-open">Open now</span>` : "",
+        ].filter(Boolean).join('<span class="iw-dot"></span>');
         const div = document.createElement("div");
         div.className = "iw";
         div.innerHTML = `
-          ${r.photoUrl ? `<img class="iw-photo" src="${r.photoUrl}" alt="${r.name}" />` : ""}
-          <div class="iw-name">${r.name}</div>
-          <div class="iw-address">${r.address}</div>
-          <div class="iw-actions">
-            <button type="button" data-toggle class="iw-toggle${isSelected ? "" : " off"}">
-              ${isSelected ? "Selected" : "Deselected"}
+          ${r.photoUrl ? `<img class="iw-photo" src="${r.photoUrl}" alt="" />` : `<div class="iw-photo-empty"></div>`}
+          <div class="iw-body">
+            <div class="iw-name">${r.name}</div>
+            ${meta ? `<div class="iw-meta">${meta}</div>` : ""}
+            <div class="iw-address">${r.address}</div>
+            <button type="button" data-toggle class="iw-toggle${isSelected ? " on" : ""}" aria-pressed="${isSelected}">
+              <span class="iw-check"></span>${isSelected ? "In the wheel" : "Add to the wheel"}
             </button>
-            ${r.mapsUrl ? `<a class="iw-link" href="${r.mapsUrl}" target="_blank" rel="noopener noreferrer">Open in Google Maps →</a>` : ""}
+            ${r.mapsUrl ? `<a class="iw-link" href="${r.mapsUrl}" target="_blank" rel="noopener noreferrer">Open in Google Maps<span aria-hidden="true"> ↗</span></a>` : ""}
           </div>
         `;
         div.querySelector("[data-toggle]")?.addEventListener("click", () => {
